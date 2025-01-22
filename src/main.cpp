@@ -7,13 +7,13 @@
 int main(int argc, char** argv) {
     World world;
 
-    world.AddObject(Object::RectangularСuboid(50, 100, 150),
-                    {{Vector3d{0, 0, -500}}, Rotation::ByAngles(4, 4, 4)});
+    world.AddObject(Object::RectangularСuboid(130, 100, 150),
+                    {{Vector3d{0, 0, -200}}, Rotation::ByAngles(0, 0.75, 0.75)});
 
     const int H = 200;
     const int W = 200;
 
-    Camera basic_camera = {1, 1000, W, W, H, H};
+    Camera basic_camera = {50, 500, W, W, H, H};
     world.AddCamera(basic_camera);
 
     Pipeline pipeline;

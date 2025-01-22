@@ -84,11 +84,19 @@ private:
 
     // Пока что тупо проецируем на NearPlane. Потом перепишем на перспективную проекцию
     Point3d ProjectToCamera(const Point3d& point, const Camera& camera) {
-        return Point3d((2 * point.x() + camera.LeftSide - camera.RightSide) /
-                           (camera.RightSide + camera.LeftSide),
-                       (2 * point.y() + camera.BottomSide - camera.TopSide) /
-                           (camera.TopSide + camera.BottomSide),
-                       -point.z() - camera.NearPlane);
+        auto n = camera.NearPlane;
+        auto f = camera.FarPlane;
+        auto l = -camera.LeftSide;
+        auto r = camera.RightSide;
+        auto t = camera.TopSide;
+        auto b = -camera.BottomSide;
+        Matrix4d project_matrix{{2 * n / (r - l), 0, (r + l) / (r - l), 0},
+                                {0, 2 * n / (t - b), (t + b) / (t - b), 0},
+                                {0, 0, -(f + n) / (f - n), -2 * n * f / (f - n)},
+                                {0, 0, -1, 0}};
+        Vector4d p = project_matrix * Vector4d{point.x(), point.y(), point.z(), 1};
+        auto w = p(3, 0);
+        return {p.x() / w, p.y() / w, p.z() / w};
     }
 
     Point3d LocalToCamera(const Point3d& point, const Pose& pose, const PosedCamera& camera) {
@@ -107,7 +115,7 @@ private:
 
     bool InsideCamera(const Point3d& point) {
         return -1 <= point.x() && point.x() <= 1 && -1 <= point.y() && point.y() <= 1 &&
-               0 <= point.z() && point.z() <= depth_;
+               -1 <= point.z() && point.z() <= 1;
     }
 
     // Пока что берём полигон, если целиком попадает в область видимости.
