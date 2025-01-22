@@ -23,4 +23,8 @@ struct Color {
     static constexpr Color Blue() {
         return { 0, 0, kChannelMax };
     }
+
+    static constexpr Color Random() {
+        return { rand() % kChannelMax, rand() % kChannelMax, rand() % kChannelMax };
+    }
 };

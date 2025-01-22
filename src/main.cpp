@@ -7,15 +7,13 @@
 int main(int argc, char** argv) {
     World world;
 
-    Object basic_triangle;
-    basic_triangle.AddPolygon({{0, 40, -10}, {40, 0, -10}, {-20, -20, -10}, Color::Red()});
+    world.AddObject(Object::RectangularСuboid(50, 100, 150),
+                    {{Vector3d{0, 0, -500}}, Rotation::ByAngles(4, 4, 4)});
 
-    world.AddObject(basic_triangle);
+    const int H = 200;
+    const int W = 200;
 
-    const int H = 70;
-    const int W = 100;
-
-    Camera basic_camera = {1, 100, W, W, H, H};
+    Camera basic_camera = {1, 1000, W, W, H, H};
     world.AddCamera(basic_camera);
 
     Pipeline pipeline;

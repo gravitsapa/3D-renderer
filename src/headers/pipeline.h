@@ -145,7 +145,7 @@ private:
             bool second_seg = h > b.y - a.y || b.y == a.y;
             int seg_height = second_seg ? c.y - b.y : b.y - a.y;
 
-            float alpha = (float)h / height;
+            float alpha = (float)(h) / height;
             float beta = (float)(second_seg ? h - b.y + a.y : h) / seg_height;
 
             int alpha_x = a.x + (c.x - a.x) * alpha;
@@ -164,6 +164,7 @@ private:
                     alpha_z + (float)(x - alpha_x) / (beta_x - alpha_x) * (beta_z - alpha_z);
                 if (z < z_buffer_[y][x].depth_) {
                     z_buffer_[y][x].col_ = col;
+                    z_buffer_[y][x].depth_ = z;
                 }
             }
         }

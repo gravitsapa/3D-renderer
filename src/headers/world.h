@@ -3,19 +3,7 @@
 #include <object.h>
 #include <camera.h>
 #include <vector>
-
-struct Rotation {
-    Matrix3d rot_matrix_ = EyeMatrix3d();
-};
-
-struct Position {
-    Vector3d pos_vector_ = ZeroVector3d();
-};
-
-struct Pose {
-    Position pos_;
-    Rotation rot_;
-};
+#include <pose.h>
 
 struct PosedObject {
     Pose pose_;
@@ -29,9 +17,9 @@ struct PosedCamera {
 
 class World {
 public:
-    void AddObject(const Object& object);
+    void AddObject(const Object& object, const Pose& pose = {Position(), Rotation()});
 
-    void AddCamera(const Camera& camera);
+    void AddCamera(const Camera& camera, const Pose& pose = {Position(), Rotation()});
 
     const std::vector<PosedObject>& GetObjects() const;
 

@@ -1,11 +1,11 @@
 #include <world.h>
 
-void World::AddObject(const Object& object) {
-    objects_.push_back({{Position(), Rotation()}, object});
+void World::AddObject(const Object& object, const Pose& pose) {
+    objects_.push_back({pose, object});
 }
 
-void World::AddCamera(const Camera& camera) {
-    cameras_.push_back({{Position(), Rotation()}, camera});
+void World::AddCamera(const Camera& camera, const Pose& pose) {
+    cameras_.push_back({pose, camera});
 }
 
 const std::vector<PosedObject>& World::GetObjects() const {
