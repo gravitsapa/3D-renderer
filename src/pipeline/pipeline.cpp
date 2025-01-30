@@ -13,7 +13,7 @@ void Pipeline::SetWorld(const World* world) {
 void Pipeline::SetCamera(const PosedCamera* camera) {
     camera_ = camera;
     if (camera) {
-        depth_ = camera->cam_.FarPlane - camera->cam_.NearPlane;
+        depth_ = camera->FarPlane - camera->NearPlane;
     } else {
         depth_ = 0;
     }
@@ -28,8 +28,8 @@ Screen Pipeline::Project() {
     Clear();
     if (world_ && camera_) {
         for (auto& object : world_->GetObjects()) {
-            for (auto& polygon : object.obj_.GetPolygons()) {
-                Polygon polygon_in_camera_space = LocalToCamera(polygon, object.pose_, *camera_);
+            for (auto& polygon : object.GetPolygons()) {
+                Polygon polygon_in_camera_space = LocalToCamera(polygon, object, *camera_);
                 auto clipped_polygons = Clip(polygon_in_camera_space);
                 for (auto& clipped_polygon : clipped_polygons) {
                     PushToZBuffer(CameraToScreen(clipped_polygon.a),
@@ -54,11 +54,11 @@ void Pipeline::Clear() {
 }
 
 Point3d Pipeline::MoveToGlobalCoordinates(const Point3d& point, const Pose& pose) {
-    return pose.rot_.rot_matrix * point + pose.pos_.pos_vector;
+    return pose.rot_matrix * point + pose.pos_vector;
 }
 
 Point3d Pipeline::MoveToViewerCoordinates(const Point3d& point, const Pose& viewer_pose) {
-    return viewer_pose.rot_.rot_matrix.inverse() * (point - viewer_pose.pos_.pos_vector);
+    return viewer_pose.rot_matrix.inverse() * (point - viewer_pose.pos_vector);
 }
 
 // Пока что тупо проецируем на NearPlane. Потом перепишем на перспективную проекцию
@@ -80,7 +80,7 @@ Point3d Pipeline::ProjectToCamera(const Point3d& point, const Camera& camera) {
 
 Point3d Pipeline::LocalToCamera(const Point3d& point, const Pose& pose, const PosedCamera& camera) {
     return ProjectToCamera(
-        MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera.pose_), camera.cam_);
+        MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera), camera);
 }
 
 Polygon Pipeline::LocalToCamera(const Polygon& polygon, const Pose& pose,

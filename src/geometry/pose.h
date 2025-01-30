@@ -16,9 +16,10 @@ struct Position {
     Vector3d pos_vector = Vector3d::Zero();
 };
 
-struct Pose {
-    Position pos_;
-    Rotation rot_;
+struct Pose : Rotation, Position {
+    Pose() = default;
+
+    Pose(const Position& pos, const Rotation& rot);
 };
 
 }  // namespace geometry

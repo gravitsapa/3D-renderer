@@ -9,21 +9,18 @@ namespace scene {
 
 using namespace geometry;
 
-struct PosedObject {
-    Pose pose_;
-    Object obj_;
+struct PosedObject : Pose, Object {
 };
 
-struct PosedCamera {
-    Pose pose_;
-    Camera cam_;
+struct PosedCamera : Pose, Camera {
 };
 
 class World {
 public:
-    void AddObject(const Object& object, const Pose& pose = {Position(), Rotation()});
+    void AddObject(const Object& object,
+                   const Pose& pose = Pose());
 
-    void AddCamera(const Camera& camera, const Pose& pose = {Position(), Rotation()});
+    void AddCamera(const Camera& camera, const Pose& pose = Pose());
 
     const std::vector<PosedObject>& GetObjects() const;
 

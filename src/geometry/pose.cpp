@@ -1,5 +1,3 @@
-#pragma once
-
 #include <pose.h>
 
 namespace geometry {
@@ -19,6 +17,9 @@ Rotation Rotation::ByAngles(const Coordinate& alpha, const Coordinate& beta,
                  {sin_alpha * cos_beta, sin_alpha * sin_beta * sin_gamma + cos_alpha * cos_gamma,
                   sin_alpha * sin_beta * cos_gamma - cos_alpha * sin_gamma},
                  {-sin_beta, cos_beta * sin_gamma, cos_beta * cos_gamma}}};
+}
+
+Pose::Pose(const Position& pos, const Rotation& rot) : Position(pos), Rotation(rot) {
 }
 
 }  // namespace geometry
