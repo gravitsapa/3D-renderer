@@ -10,11 +10,13 @@ add_executable(3D-renderer
     src/pipeline/pipeline.cpp
     src/pipeline/screen.cpp
     src/world/world.cpp
+    src/application/application.cpp
     include/tgaimage/tgaimage.cpp
     )
 
 target_include_directories(3D-renderer PRIVATE include/eigen-3.4.0)
 target_include_directories(3D-renderer PRIVATE include/tgaimage)
+target_include_directories(3D-renderer PRIVATE src/application)
 target_include_directories(3D-renderer PRIVATE src/geometry)
 target_include_directories(3D-renderer PRIVATE src/pipeline)
 target_include_directories(3D-renderer PRIVATE src/world)
