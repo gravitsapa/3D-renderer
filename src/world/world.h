@@ -5,6 +5,10 @@
 #include <vector>
 #include <pose.h>
 
+namespace scene {
+
+using namespace geometry;
+
 struct PosedObject {
     Pose pose_;
     Object obj_;
@@ -29,3 +33,5 @@ private:
     std::vector<PosedObject> objects_;
     std::vector<PosedCamera> cameras_;
 };
+
+}  // namespace scene

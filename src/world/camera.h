@@ -2,6 +2,10 @@
 
 #include <point.h>
 
+namespace scene {
+    
+using namespace geometry;
+
 struct Camera {
     Coordinate NearPlane;
     Coordinate FarPlane;
@@ -10,3 +14,5 @@ struct Camera {
     Coordinate TopSide;
     Coordinate BottomSide;
 };
+
+}  // namespace scene

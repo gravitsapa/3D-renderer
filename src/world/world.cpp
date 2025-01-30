@@ -1,5 +1,7 @@
 #include <world.h>
 
+namespace scene {
+
 void World::AddObject(const Object& object, const Pose& pose) {
     objects_.push_back({pose, object});
 }
@@ -15,3 +17,5 @@ const std::vector<PosedObject>& World::GetObjects() const {
 const std::vector<PosedCamera>& World::GetCameras() const {
     return cameras_;
 }
+
+}  // namespace scene

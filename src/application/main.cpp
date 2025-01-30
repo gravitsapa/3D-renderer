@@ -5,18 +5,18 @@
 #include <tgaimage.h>
 
 int main(int argc, char** argv) {
-    World world;
+    scene::World world;
 
-    world.AddObject(Object::RectangularСuboid(130, 100, 150),
-                    {{Vector3d{0, 0, -200}}, Rotation::ByAngles(0, 0.75, 0.75)});
+    world.AddObject(geometry::Object::RectangularСuboid(130, 100, 150),
+                    {{geometry::Vector3d{0, 0, -200}}, geometry::Rotation::ByAngles(0, 0.75, 0.75)});
 
     const int H = 200;
     const int W = 200;
 
-    Camera basic_camera = {50, 500, W, W, H, H};
+    scene::Camera basic_camera = {50, 500, W, W, H, H};
     world.AddCamera(basic_camera);
 
-    Pipeline pipeline;
+    pipeline::Pipeline pipeline;
     pipeline.SetScreenSize(2 * H, 2 * W);
     pipeline.SetWorld(&world);
     pipeline.SetCamera(&world.GetCameras()[0]);
@@ -27,8 +27,8 @@ int main(int argc, char** argv) {
     for (int y = 0; y < 2 * H; ++y) {
         for (int x = 0; x < 2 * W; ++x) {
             image.set(x, y,
-                      TGAColor(screen.GetMatrix()[y][x].r_, screen.GetMatrix()[y][x].g_,
-                               screen.GetMatrix()[y][x].b_, 255));
+                      TGAColor(screen.GetMatrix()[y][x].r, screen.GetMatrix()[y][x].g,
+                               screen.GetMatrix()[y][x].b, 255));
         }
     }
 
