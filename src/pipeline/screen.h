@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <color.h>
+#include <orientation.h>
 
 namespace pipeline {
 
@@ -9,11 +10,11 @@ using namespace geometry;
 
 class Screen {
 public:
-    void SetSize(size_t h, size_t w);
+    void SetSize(Height h, Width w);
 
-    size_t GetHeight();
+    Height GetHeight();
 
-    size_t GetWidth();
+    Width GetWidth();
 
     std::vector<std::vector<Color>>& GetMatrix();
 

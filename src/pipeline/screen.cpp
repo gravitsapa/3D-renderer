@@ -2,7 +2,7 @@
 
 namespace pipeline {
 
-void Screen::SetSize(size_t h, size_t w) {
+void Screen::SetSize(Height h, Width w) {
     matrix_.resize(h, std::vector<Color>(w));
 }
 
@@ -10,12 +10,12 @@ std::vector<std::vector<Color>>& Screen::GetMatrix() {
     return matrix_;
 }
 
-size_t Screen::GetHeight() {
-    return matrix_.size();
+Height Screen::GetHeight() {
+    return Height(matrix_.size());
 }
 
-size_t Screen::GetWidth() {
-    return matrix_[0].size();
+Width Screen::GetWidth() {
+    return Width(matrix_[0].size());
 }
 
 }  // namespace pipeline

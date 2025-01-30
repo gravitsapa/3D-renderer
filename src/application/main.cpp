@@ -10,21 +10,21 @@ int main(int argc, char** argv) {
     world.AddObject(geometry::Object::RectangularСuboid(130, 100, 150),
                     {{geometry::Vector3d{0, 0, -200}}, geometry::Rotation::ByAngles(0, 0.75, 0.75)});
 
-    const int H = 200;
-    const int W = 300;
+    const int H = 400;
+    const int W = 600;
 
-    scene::Camera basic_camera = {50, 500, W, W, H, H};
+    scene::Camera basic_camera = {50, 500, W / 2, W / 2, H / 2, H / 2};
     world.AddCamera(basic_camera);
 
     pipeline::Screen screen;
-    screen.SetSize(2 * H, 2 * W);
+    screen.SetSize(pipeline::Height(H), pipeline::Width(W));
     pipeline::Pipeline pipeline;
     screen = pipeline.Project(world, world.GetCameras()[0], std::move(screen));
 
-    TGAImage image(2 * W, 2 * H, TGAImage::RGB);
+    TGAImage image(W, H, TGAImage::RGB);
 
-    for (int y = 0; y < 2 * H; ++y) {
-        for (int x = 0; x < 2 * W; ++x) {
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
             image.set(x, y,
                       TGAColor(screen.GetMatrix()[y][x].r, screen.GetMatrix()[y][x].g,
                                screen.GetMatrix()[y][x].b, 255));

@@ -5,8 +5,8 @@ namespace pipeline {
 Screen Pipeline::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
     Coordinate depth_ = camera.FarPlane - camera.NearPlane;
-    int height = screen.GetHeight();
-    int width = screen.GetWidth();
+    Height height = screen.GetHeight();
+    Width width = screen.GetWidth();
     z_buffer_.assign(height, std::vector<BufferPoint>(width, {depth_, background_color}));
 
     for (auto& object : world.GetObjects()) {
@@ -14,9 +14,9 @@ Screen Pipeline::Project(const World& world, const PosedCamera& camera, Screen&&
             Polygon polygon_in_camera_space = LocalToCamera(polygon, object, camera);
             auto clipped_polygons = Clip(polygon_in_camera_space);
             for (auto& clipped_polygon : clipped_polygons) {
-                PushToZBuffer(CameraToScreen(clipped_polygon.a, width, height),
-                              CameraToScreen(clipped_polygon.b, width, height),
-                              CameraToScreen(clipped_polygon.c, width, height),
+                PushToZBuffer(CameraToScreen(clipped_polygon.a, height, width),
+                              CameraToScreen(clipped_polygon.b, height, width),
+                              CameraToScreen(clipped_polygon.c, height, width),
                               clipped_polygon.color);
             }
         }
@@ -83,7 +83,7 @@ std::vector<Polygon> Pipeline::Clip(const Polygon& polygon) {
     return {polygon};
 }
 
-RasterPoint Pipeline::CameraToScreen(const Point3d point, int width, int height) {
+RasterPoint Pipeline::CameraToScreen(const Point3d point, Height height, Width width) {
     return {static_cast<int>((point.x() + 1) * width / 2),
             static_cast<int>((point.y() + 1) * height / 2), point.z()};
 }

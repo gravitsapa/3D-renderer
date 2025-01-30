@@ -5,6 +5,7 @@
 #include <screen.h>
 #include <polygon.h>
 #include <vector>
+#include <orientation.h>
 
 namespace pipeline {
 
@@ -44,7 +45,7 @@ private:
 
     std::vector<Polygon> Clip(const Polygon& polygon);
 
-    RasterPoint CameraToScreen(const Point3d point, int width, int height);
+    RasterPoint CameraToScreen(const Point3d point, Height height, Width width);
 
     void PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col);
 };
