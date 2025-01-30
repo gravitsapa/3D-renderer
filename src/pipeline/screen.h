@@ -11,6 +11,10 @@ class Screen {
 public:
     void SetSize(size_t h, size_t w);
 
+    size_t GetHeight();
+
+    size_t GetWidth();
+
     std::vector<std::vector<Color>>& GetMatrix();
 
 private:

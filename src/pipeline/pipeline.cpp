@@ -2,55 +2,32 @@
 
 namespace pipeline {
 
-void Pipeline::SetBackgroundColor(const Color& col) {
-    background_color_ = col;
-}
+Screen Pipeline::Project(const World& world, const PosedCamera& camera, Screen&& screen,
+                         const Color& background_color) {
+    Coordinate depth_ = camera.FarPlane - camera.NearPlane;
+    int height = screen.GetHeight();
+    int width = screen.GetWidth();
+    z_buffer_.assign(height, std::vector<BufferPoint>(width, {depth_, background_color}));
 
-void Pipeline::SetWorld(const World* world) {
-    world_ = world;
-}
-
-void Pipeline::SetCamera(const PosedCamera* camera) {
-    camera_ = camera;
-    if (camera) {
-        depth_ = camera->FarPlane - camera->NearPlane;
-    } else {
-        depth_ = 0;
-    }
-}
-
-void Pipeline::SetScreenSize(const size_t height, const size_t width) {
-    height_ = height;
-    width_ = width;
-}
-
-Screen Pipeline::Project() {
-    Clear();
-    if (world_ && camera_) {
-        for (auto& object : world_->GetObjects()) {
-            for (auto& polygon : object.GetPolygons()) {
-                Polygon polygon_in_camera_space = LocalToCamera(polygon, object, *camera_);
-                auto clipped_polygons = Clip(polygon_in_camera_space);
-                for (auto& clipped_polygon : clipped_polygons) {
-                    PushToZBuffer(CameraToScreen(clipped_polygon.a),
-                                  CameraToScreen(clipped_polygon.b),
-                                  CameraToScreen(clipped_polygon.c), clipped_polygon.color);
-                }
+    for (auto& object : world.GetObjects()) {
+        for (auto& polygon : object.GetPolygons()) {
+            Polygon polygon_in_camera_space = LocalToCamera(polygon, object, camera);
+            auto clipped_polygons = Clip(polygon_in_camera_space);
+            for (auto& clipped_polygon : clipped_polygons) {
+                PushToZBuffer(CameraToScreen(clipped_polygon.a, width, height),
+                              CameraToScreen(clipped_polygon.b, width, height),
+                              CameraToScreen(clipped_polygon.c, width, height),
+                              clipped_polygon.color);
             }
         }
     }
-    Screen screen;
-    screen.SetSize(height_, width_);
-    for (size_t i = 0; i < height_; ++i) {
-        for (size_t j = 0; j < width_; ++j) {
+
+    for (size_t i = 0; i < height; ++i) {
+        for (size_t j = 0; j < width; ++j) {
             screen.GetMatrix()[i][j] = z_buffer_[i][j].col_;
         }
     }
     return screen;
-}
-
-void Pipeline::Clear() {
-    z_buffer_.assign(height_, std::vector<BufferPoint>(width_, {depth_, background_color_}));
 }
 
 Point3d Pipeline::MoveToGlobalCoordinates(const Point3d& point, const Pose& pose) {
@@ -79,8 +56,8 @@ Point3d Pipeline::ProjectToCamera(const Point3d& point, const Camera& camera) {
 }
 
 Point3d Pipeline::LocalToCamera(const Point3d& point, const Pose& pose, const PosedCamera& camera) {
-    return ProjectToCamera(
-        MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera), camera);
+    return ProjectToCamera(MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera),
+                           camera);
 }
 
 Polygon Pipeline::LocalToCamera(const Polygon& polygon, const Pose& pose,
@@ -106,9 +83,9 @@ std::vector<Polygon> Pipeline::Clip(const Polygon& polygon) {
     return {polygon};
 }
 
-RasterPoint Pipeline::CameraToScreen(const Point3d point) {
-    return {static_cast<int>((point.x() + 1) * width_ / 2),
-            static_cast<int>((point.y() + 1) * height_ / 2), point.z()};
+RasterPoint Pipeline::CameraToScreen(const Point3d point, int width, int height) {
+    return {static_cast<int>((point.x() + 1) * width / 2),
+            static_cast<int>((point.y() + 1) * height / 2), point.z()};
 }
 
 // пока что примитивная растеризация

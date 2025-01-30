@@ -15,30 +15,17 @@ struct RasterPoint {
     Coordinate z;
 };
 
+struct BufferPoint {
+    Coordinate depth_;
+    Color col_;
+};
+
 class Pipeline {
 public:
-    void SetBackgroundColor(const Color& col);
-
-    void SetWorld(const World* world);
-
-    void SetCamera(const PosedCamera* camera);
-
-    void SetScreenSize(const size_t height, const size_t width);
-
-    Screen Project();
+    Screen Project(const World& world, const PosedCamera& camera, Screen&& screen,
+                   const Color& background_color = Color::White());
 
 private:
-    Color background_color_ = Color::White();
-    const World* world_ = nullptr;
-    const PosedCamera* camera_ = nullptr;
-    size_t height_ = 1, width_ = 1;
-    Coordinate depth_ = 0;
-
-    struct BufferPoint {
-        Coordinate depth_;
-        Color col_;
-    };
-
     std::vector<std::vector<BufferPoint>> z_buffer_;
 
     void Clear();
@@ -57,7 +44,7 @@ private:
 
     std::vector<Polygon> Clip(const Polygon& polygon);
 
-    RasterPoint CameraToScreen(const Point3d point);
+    RasterPoint CameraToScreen(const Point3d point, int width, int height);
 
     void PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col);
 };
