@@ -4,10 +4,10 @@
 
 namespace geometry {
 
-typedef double Coordinate;
-typedef Eigen::Matrix<Coordinate, 3, 1> Vector3d;
-typedef Eigen::Matrix<Coordinate, 3, 3> Matrix3d;
-typedef Eigen::Matrix<Coordinate, 4, 1> Vector4d;
-typedef Eigen::Matrix<Coordinate, 4, 4> Matrix4d;
+using Coordinate = double;
+using Vector3d = Eigen::Matrix<Coordinate, 3, 1>;
+using Matrix3d = Eigen::Matrix<Coordinate, 3, 3>;
+using Vector4d = Eigen::Matrix<Coordinate, 4, 1>;
+using Matrix4d = Eigen::Matrix<Coordinate, 4, 4>;
 
 }  // namespace geometry

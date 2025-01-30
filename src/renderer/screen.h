@@ -4,7 +4,7 @@
 #include <color.h>
 #include <orientation.h>
 
-namespace pipeline {
+namespace renderer {
 
 using namespace geometry;
 

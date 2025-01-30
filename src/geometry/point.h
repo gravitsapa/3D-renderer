@@ -4,6 +4,6 @@
 
 namespace geometry {
 
-typedef Vector3d Point3d;
+using Point3d = Vector3d;
 
 }

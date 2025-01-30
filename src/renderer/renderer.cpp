@@ -1,8 +1,8 @@
-#include <pipeline.h>
+#include <renderer.h>
 
-namespace pipeline {
+namespace renderer {
 
-Screen Pipeline::Project(const World& world, const PosedCamera& camera, Screen&& screen,
+Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
     Coordinate depth_ = camera.FarPlane - camera.NearPlane;
     Height height = screen.GetHeight();
@@ -30,16 +30,16 @@ Screen Pipeline::Project(const World& world, const PosedCamera& camera, Screen&&
     return screen;
 }
 
-Point3d Pipeline::MoveToGlobalCoordinates(const Point3d& point, const Pose& pose) {
+Point3d Renderer::MoveToGlobalCoordinates(const Point3d& point, const Pose& pose) {
     return pose.rot_matrix * point + pose.pos_vector;
 }
 
-Point3d Pipeline::MoveToViewerCoordinates(const Point3d& point, const Pose& viewer_pose) {
+Point3d Renderer::MoveToViewerCoordinates(const Point3d& point, const Pose& viewer_pose) {
     return viewer_pose.rot_matrix.inverse() * (point - viewer_pose.pos_vector);
 }
 
 // Пока что тупо проецируем на NearPlane. Потом перепишем на перспективную проекцию
-Point3d Pipeline::ProjectToCamera(const Point3d& point, const Camera& camera) {
+Point3d Renderer::ProjectToCamera(const Point3d& point, const Camera& camera) {
     auto n = camera.NearPlane;
     auto f = camera.FarPlane;
     auto l = -camera.LeftSide;
@@ -55,12 +55,12 @@ Point3d Pipeline::ProjectToCamera(const Point3d& point, const Camera& camera) {
     return {p.x() / w, p.y() / w, p.z() / w};
 }
 
-Point3d Pipeline::LocalToCamera(const Point3d& point, const Pose& pose, const PosedCamera& camera) {
+Point3d Renderer::LocalToCamera(const Point3d& point, const Pose& pose, const PosedCamera& camera) {
     return ProjectToCamera(MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera),
                            camera);
 }
 
-Polygon Pipeline::LocalToCamera(const Polygon& polygon, const Pose& pose,
+Polygon Renderer::LocalToCamera(const Polygon& polygon, const Pose& pose,
                                 const PosedCamera& camera) {
     Polygon res = polygon;
     res.a = LocalToCamera(res.a, pose, camera);
@@ -69,27 +69,27 @@ Polygon Pipeline::LocalToCamera(const Polygon& polygon, const Pose& pose,
     return res;
 }
 
-bool Pipeline::InsideCamera(const Point3d& point) {
+bool Renderer::InsideCamera(const Point3d& point) {
     return -1 <= point.x() && point.x() <= 1 && -1 <= point.y() && point.y() <= 1 &&
            -1 <= point.z() && point.z() <= 1;
 }
 
 // Пока что берём полигон, если целиком попадает в область видимости.
 // Потом напишем нормальный клиппинг
-std::vector<Polygon> Pipeline::Clip(const Polygon& polygon) {
+std::vector<Polygon> Renderer::Clip(const Polygon& polygon) {
     if (!InsideCamera(polygon.a) || !InsideCamera(polygon.b) || !InsideCamera(polygon.c)) {
         return {};
     }
     return {polygon};
 }
 
-RasterPoint Pipeline::CameraToScreen(const Point3d point, Height height, Width width) {
+RasterPoint Renderer::CameraToScreen(const Point3d point, Height height, Width width) {
     return {static_cast<int>((point.x() + 1) * width / 2),
             static_cast<int>((point.y() + 1) * height / 2), point.z()};
 }
 
 // пока что примитивная растеризация
-void Pipeline::PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col) {
+void Renderer::PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col) {
     if (a.y > b.y)
         std::swap(a, b);
     if (b.y > c.y)

@@ -1,6 +1,6 @@
 #include <screen.h>
 
-namespace pipeline {
+namespace renderer {
 
 void Screen::SetSize(Height h, Width w) {
     matrix_.resize(h, std::vector<Color>(w));

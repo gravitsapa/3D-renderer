@@ -1,7 +1,7 @@
 #include <application.h>
 #include <iostream>
 #include <world.h>
-#include <pipeline.h>
+#include <renderer.h>
 #include <tgaimage.h>
 
 namespace application {
@@ -19,10 +19,10 @@ void Application::Run(const char* filename) {
     scene::Camera basic_camera = {50, 500, W / 2, W / 2, H / 2, H / 2};
     world.AddCamera(basic_camera);
 
-    pipeline::Screen screen;
-    screen.SetSize(pipeline::Height(H), pipeline::Width(W));
-    pipeline::Pipeline pipeline;
-    screen = pipeline.Project(world, world.GetCameras()[0], std::move(screen));
+    renderer::Screen screen;
+    screen.SetSize(renderer::Height(H), renderer::Width(W));
+    renderer::Renderer renderer;
+    screen = renderer.Project(world, world.GetCameras()[0], std::move(screen));
 
     TGAImage image(W, H, TGAImage::RGB);
 
@@ -36,7 +36,7 @@ void Application::Run(const char* filename) {
 
     image.write_tga_file(filename);
 
-    std::cout << "Pipeline done" << std::endl;
+    std::cout << "Renderer done" << std::endl;
 }
 
 }  // namespace application

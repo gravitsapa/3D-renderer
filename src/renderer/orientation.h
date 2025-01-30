@@ -1,9 +1,9 @@
 #pragma once
 
-namespace pipeline {
+namespace renderer {
 
 enum Height : int {};
 
 enum Width : int {};
 
-}  // namespace pipeline
+}  // namespace renderer

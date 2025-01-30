@@ -7,7 +7,7 @@
 #include <vector>
 #include <orientation.h>
 
-namespace pipeline {
+namespace renderer {
 
 using namespace scene;
 
@@ -21,7 +21,7 @@ struct BufferPoint {
     Color col_;
 };
 
-class Pipeline {
+class Renderer {
 public:
     Screen Project(const World& world, const PosedCamera& camera, Screen&& screen,
                    const Color& background_color = Color::White());
@@ -50,4 +50,4 @@ private:
     void PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col);
 };
 
-}  // namespace pipeline
+}  // namespace renderer
