@@ -15,6 +15,8 @@ public:
 
     geometry::Point3d ProjectPointOnMe(const geometry::Point3d& point) const;
 
+    geometry::Matrix4d GetProjectionMatrix() const;
+
 private:
     geometry::Coordinate near_plane_;
     geometry::Coordinate far_plane_;

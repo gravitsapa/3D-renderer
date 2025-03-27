@@ -7,7 +7,7 @@ namespace project {
 
 namespace kernel {
 
-struct Polygon {
+struct Triangle {
     geometry::Point3d a;
     geometry::Point3d b;
     geometry::Point3d c;

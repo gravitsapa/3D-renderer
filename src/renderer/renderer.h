@@ -33,12 +33,12 @@ private:
                                               const geometry::Pose& viewer_pose);
     geometry::Point3d LocalToCamera(const geometry::Point3d& point, const geometry::Pose& pose,
                                     const PosedCamera& camera);
-    Polygon LocalToCamera(const Polygon& polygon, const geometry::Pose& pose,
+    Triangle LocalToCamera(const Triangle& polygon, const geometry::Pose& pose,
                           const PosedCamera& camera);
     RasterPoint CameraToScreen(const geometry::Point3d point, Height height, Width width);
 
     bool InsideCamera(const geometry::Point3d& point);
-    std::vector<Polygon> Clip(const Polygon& polygon);
+    std::vector<Triangle> Clip(const Triangle& polygon);
     void PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col);
 
     std::vector<std::vector<BufferPoint>> z_buffer_;

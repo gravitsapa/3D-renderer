@@ -17,20 +17,22 @@ Camera::Camera(geometry::Coordinate near_plane, geometry::Coordinate far_plane,
     assert(top_side_ > 0 && bottom_side_ > 0);
 }
 
-geometry::Point3d Camera::ProjectPointOnMe(const geometry::Point3d& point) const {
+geometry::Matrix4d Camera::GetProjectionMatrix() const {
     auto n = near_plane_;
     auto f = far_plane_;
     auto l = -left_side_;
     auto r = right_side_;
     auto t = top_side_;
     auto b = -bottom_side_;
-    geometry::Matrix4d project_matrix{{2 * n / (r - l), 0, (r + l) / (r - l), 0},
-                                      {0, 2 * n / (t - b), (t + b) / (t - b), 0},
-                                      {0, 0, -(f + n) / (f - n), -2 * n * f / (f - n)},
-                                      {0, 0, -1, 0}};
-    geometry::Vector4d p = project_matrix * geometry::Vector4d{point.x(), point.y(), point.z(), 1};
-    auto w = p(3, 0);
-    return {p.x() / w, p.y() / w, p.z() / w};
+    return geometry::Matrix4d{{2 * n / (r - l), 0, (r + l) / (r - l), 0},
+                              {0, 2 * n / (t - b), (t + b) / (t - b), 0},
+                              {0, 0, -(f + n) / (f - n), -2 * n * f / (f - n)},
+                              {0, 0, -1, 0}};
+}
+
+geometry::Point3d Camera::ProjectPointOnMe(const geometry::Point3d& point) const {
+    return geometry::ConvertToPoint(GetProjectionMatrix() *
+                                    geometry::ConvertToHomogeneousPoint(point));
 }
 
 geometry::Coordinate Camera::GetDepth() const {

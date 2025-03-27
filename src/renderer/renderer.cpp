@@ -11,7 +11,7 @@ Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&&
 
     for (auto& object : world.GetObjects()) {
         for (auto& polygon : object.GetPolygons()) {
-            Polygon polygon_in_camera_space = LocalToCamera(polygon, object, camera);
+            Triangle polygon_in_camera_space = LocalToCamera(polygon, object, camera);
             auto clipped_polygons = Clip(polygon_in_camera_space);
             for (auto& clipped_polygon : clipped_polygons) {
                 PushToZBuffer(CameraToScreen(clipped_polygon.a, height, width),
@@ -46,9 +46,9 @@ geometry::Point3d Renderer::LocalToCamera(const geometry::Point3d& point,
         MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera));
 }
 
-Polygon Renderer::LocalToCamera(const Polygon& polygon, const geometry::Pose& pose,
+Triangle Renderer::LocalToCamera(const Triangle& polygon, const geometry::Pose& pose,
                                 const PosedCamera& camera) {
-    Polygon res = polygon;
+    Triangle res = polygon;
     res.a = LocalToCamera(res.a, pose, camera);
     res.b = LocalToCamera(res.b, pose, camera);
     res.c = LocalToCamera(res.c, pose, camera);
@@ -62,7 +62,7 @@ bool Renderer::InsideCamera(const geometry::Point3d& point) {
 
 // Пока что берём полигон, если целиком попадает в область видимости.
 // Потом напишем нормальный клиппинг
-std::vector<Polygon> Renderer::Clip(const Polygon& polygon) {
+std::vector<Triangle> Renderer::Clip(const Triangle& polygon) {
     if (!InsideCamera(polygon.a) || !InsideCamera(polygon.b) || !InsideCamera(polygon.c)) {
         return {};
     }

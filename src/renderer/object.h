@@ -10,23 +10,23 @@ namespace kernel {
 
 class Object {
 public:
-    void AddPolygon(const Polygon& polygon);
-    const std::vector<Polygon>& GetPolygons() const;
+    void AddPolygon(const Triangle& polygon);
+    const std::vector<Triangle>& GetPolygons() const;
     void Merge(Object&& rhs);
 
-    static Object RectangularСuboid(const geometry::Point3d& center, geometry::Coordinate w,
+    static Object CreateRectangularСuboid(const geometry::Point3d& center, geometry::Coordinate w,
                                     geometry::Coordinate h, geometry::Coordinate d);
-    static Object RectangularСuboid(geometry::Coordinate w, geometry::Coordinate h,
+    static Object CreateRectangularСuboid(geometry::Coordinate w, geometry::Coordinate h,
                                     geometry::Coordinate d);
-    static Object Parallelepiped(const geometry::Point3d& center, const geometry::Vector3d& w,
+    static Object CreateParallelepiped(const geometry::Point3d& center, const geometry::Vector3d& w,
                                  const geometry::Vector3d& h, const geometry::Vector3d d);
-    static Object Rectangle(const geometry::Point3d& center, const geometry::Vector3d& h,
+    static Object CreateRectangle(const geometry::Point3d& center, const geometry::Vector3d& h,
                             const geometry::Vector3d& w, const Color& color);
-    static Object Triangle(const geometry::Point3d& a, const geometry::Point3d& b,
+    static Object CreateTriangle(const geometry::Point3d& a, const geometry::Point3d& b,
                            const geometry::Point3d& c, const Color& color);
 
 private:
-    std::vector<Polygon> polygons_;
+    std::vector<Triangle> polygons_;
 };
 
 }  // namespace kernel
