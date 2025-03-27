@@ -3,6 +3,7 @@
 #include <quantities.h>
 #include <cmath>
 
+namespace project {
 namespace geometry {
 
 struct Rotation {
@@ -23,3 +24,4 @@ struct Pose : Rotation, Position {
 };
 
 }  // namespace geometry
+}  // namespace project

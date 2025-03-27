@@ -1,7 +1,8 @@
 #include <screen.h>
 #include <cassert>
 
-namespace renderer {
+namespace project {
+namespace kernel {
 
 Screen::Screen(Height h, Width w) : matrix_(h, std::vector<Color>(w)) {
     assert(h > 0 && w > 0 && "Screen size must be positive");
@@ -13,9 +14,7 @@ TGAImage Screen::ConvertToTGA() {
     for (int y = 0; y < GetHeight(); ++y) {
         for (int x = 0; x < GetWidth(); ++x) {
             const auto& pixel_color = matrix_[y][x];
-            image.set(x, y,
-                      TGAColor(pixel_color.r, pixel_color.g,
-                               pixel_color.b, 255));
+            image.set(x, y, TGAColor(pixel_color.r, pixel_color.g, pixel_color.b, 255));
         }
     }
 
@@ -34,4 +33,5 @@ Width Screen::GetWidth() {
     return Width(matrix_[0].size());
 }
 
-}  // namespace renderer
+}  // namespace kernel
+}  // namespace project

@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 
+namespace project {
 namespace except {
 void react() {
     try {
@@ -13,3 +14,4 @@ void react() {
     }
 }
 }  // namespace except
+}  // namespace project

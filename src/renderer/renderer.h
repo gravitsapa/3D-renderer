@@ -7,17 +7,16 @@
 #include <vector>
 #include <orientation.h>
 
-namespace renderer {
-
-using namespace scene;
+namespace project {
+namespace kernel {
 
 struct RasterPoint {
     int x, y;
-    Coordinate z;
+    geometry::Coordinate z;
 };
 
 struct BufferPoint {
-    Coordinate depth_;
+    geometry::Coordinate depth_;
     Color col_;
 };
 
@@ -29,25 +28,28 @@ public:
 private:
     std::vector<std::vector<BufferPoint>> z_buffer_;
 
-    void Clear();
+    geometry::Point3d MoveToGlobalCoordinates(const geometry::Point3d& point,
+                                              const geometry::Pose& pose);
 
-    Point3d MoveToGlobalCoordinates(const Point3d& point, const Pose& pose);
+    geometry::Point3d MoveToViewerCoordinates(const geometry::Point3d& point,
+                                              const geometry::Pose& viewer_pose);
 
-    Point3d MoveToViewerCoordinates(const Point3d& point, const Pose& viewer_pose);
+    geometry::Point3d ProjectToCamera(const geometry::Point3d& point, const Camera& camera);
 
-    Point3d ProjectToCamera(const Point3d& point, const Camera& camera);
+    geometry::Point3d LocalToCamera(const geometry::Point3d& point, const geometry::Pose& pose,
+                                    const PosedCamera& camera);
 
-    Point3d LocalToCamera(const Point3d& point, const Pose& pose, const PosedCamera& camera);
+    Polygon LocalToCamera(const Polygon& polygon, const geometry::Pose& pose,
+                          const PosedCamera& camera);
 
-    Polygon LocalToCamera(const Polygon& polygon, const Pose& pose, const PosedCamera& camera);
-
-    bool InsideCamera(const Point3d& point);
+    bool InsideCamera(const geometry::Point3d& point);
 
     std::vector<Polygon> Clip(const Polygon& polygon);
 
-    RasterPoint CameraToScreen(const Point3d point, Height height, Width width);
+    RasterPoint CameraToScreen(const geometry::Point3d point, Height height, Width width);
 
     void PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col);
 };
 
-}  // namespace renderer
+}  // namespace kernel
+}  // namespace project

@@ -1,6 +1,8 @@
 #include <object.h>
 
-namespace geometry {
+namespace project {
+
+namespace kernel {
 
 void Object::AddPolygon(const Polygon& polygon) {
     polygons_.push_back(polygon);
@@ -14,7 +16,8 @@ void Object::Clear() {
     polygons_.clear();
 }
 
-Object Object::RectangularСuboid(const Point3d& center, Coordinate w, Coordinate h, Coordinate d) {
+Object Object::RectangularСuboid(const geometry::Point3d& center, geometry::Coordinate w,
+                                 geometry::Coordinate h, geometry::Coordinate d) {
     w /= 2;
     h /= 2;
     d /= 2;
@@ -22,12 +25,13 @@ Object Object::RectangularСuboid(const Point3d& center, Coordinate w, Coordinat
     return Parallelepiped(center, {w, 0, 0}, {0, h, 0}, {0, 0, d});
 }
 
-Object Object::RectangularСuboid(Coordinate w, Coordinate h, Coordinate d) {
-    return RectangularСuboid(Point3d(), w, h, d);
+Object Object::RectangularСuboid(geometry::Coordinate w, geometry::Coordinate h,
+                                 geometry::Coordinate d) {
+    return RectangularСuboid(geometry::Point3d(), w, h, d);
 }
 
-Object Object::Parallelepiped(const Point3d& center, const Vector3d& w, const Vector3d& h,
-                              const Vector3d d) {
+Object Object::Parallelepiped(const geometry::Point3d& center, const geometry::Vector3d& w,
+                              const geometry::Vector3d& h, const geometry::Vector3d d) {
     Object res;
     res.Insert(Rectangle(center + w, h, d, Color::Random()));
     res.Insert(Rectangle(center - w, h, d, Color::Random()));
@@ -38,15 +42,16 @@ Object Object::Parallelepiped(const Point3d& center, const Vector3d& w, const Ve
     return res;
 }
 
-Object Object::Rectangle(const Point3d& center, const Vector3d& h, const Vector3d& w,
-                         const Color& color) {
+Object Object::Rectangle(const geometry::Point3d& center, const geometry::Vector3d& h,
+                         const geometry::Vector3d& w, const Color& color) {
     Object res;
     res.AddPolygon({center + h + w, center - h - w, center + h - w, color});
     res.AddPolygon({center + h + w, center - h - w, center - h + w, color});
     return res;
 }
 
-Object Object::Triangle(const Point3d& a, const Point3d& b, const Point3d& c, const Color& color) {
+Object Object::Triangle(const geometry::Point3d& a, const geometry::Point3d& b,
+                        const geometry::Point3d& c, const Color& color) {
     Object res;
     res.AddPolygon({a, b, c, color});
     return res;
@@ -63,4 +68,5 @@ void Object::Insert(Object&& rhs) {
     }
 }
 
-}  // namespace geometry
+}  // namespace kernel
+}  // namespace project

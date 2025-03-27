@@ -5,9 +5,8 @@
 #include <orientation.h>
 #include <tgaimage.h>
 
-namespace renderer {
-
-using namespace geometry;
+namespace project {
+namespace kernel {
 
 class Screen {
 public:
@@ -25,4 +24,5 @@ private:
     std::vector<std::vector<Color>> matrix_;
 };
 
-}  // namespace renderer
+}  // namespace kernel
+}  // namespace project

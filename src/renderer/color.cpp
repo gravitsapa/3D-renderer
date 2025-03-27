@@ -1,7 +1,9 @@
 #include <color.h>
 #include <cstdlib>
 
-namespace geometry {
+namespace project {
+
+namespace kernel {
 
 Color Color::White() {
     return {kChannelMax, kChannelMax, kChannelMax};
@@ -26,3 +28,5 @@ Color Color::Random() {
 }
 
 }  // namespace geometry
+
+}  // namespace project

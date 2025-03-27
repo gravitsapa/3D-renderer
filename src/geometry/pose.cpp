@@ -1,5 +1,6 @@
 #include <pose.h>
 
+namespace project {
 namespace geometry {
 
 Rotation Rotation::ByAngles(const Coordinate& alpha, const Coordinate& beta,
@@ -23,3 +24,4 @@ Pose::Pose(const Position& pos, const Rotation& rot) : Position(pos), Rotation(r
 }
 
 }  // namespace geometry
+}  // namespace project

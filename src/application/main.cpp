@@ -3,10 +3,10 @@
 
 int main(int argc, char** argv) {
     try {
-        project::Application app(argv[1], renderer::Height(400), renderer::Width(600));
+        project::application::Application app(argv[1], project::kernel::Height(400), project::kernel::Width(600));
         app.Run();
     } catch (...) {
-        except::react();
+        project::except::react();
     }
     return 0;
 }

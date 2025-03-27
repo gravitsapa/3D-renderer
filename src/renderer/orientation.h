@@ -1,9 +1,11 @@
 #pragma once
 
-namespace renderer {
+namespace project {
+namespace kernel {
 
 enum Height : int {};
 
 enum Width : int {};
 
-}  // namespace renderer
+}  // namespace kernel
+}  // namespace project

@@ -2,7 +2,9 @@
 
 #include <climits>
 
-namespace geometry {
+namespace project {
+
+namespace kernel {
 
 struct Color {
     using ChannelType = unsigned char;
@@ -22,3 +24,5 @@ struct Color {
 };
 
 }  // namespace geometry
+
+}  // namespace project

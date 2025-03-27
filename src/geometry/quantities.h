@@ -2,6 +2,7 @@
 
 #include <Eigen/Dense>
 
+namespace project {
 namespace geometry {
 
 using Coordinate = double;
@@ -11,3 +12,4 @@ using Vector4d = Eigen::Matrix<Coordinate, 4, 1>;
 using Matrix4d = Eigen::Matrix<Coordinate, 4, 4>;
 
 }  // namespace geometry
+}  // namespace project

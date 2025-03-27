@@ -1,12 +1,13 @@
 #include <world.h>
 
-namespace scene {
+namespace project {
+namespace kernel {
 
-void World::AddObject(const Object& object, const Pose& pose) {
+void World::AddObject(const Object& object, const geometry::Pose& pose) {
     objects_.push_back({pose, object});
 }
 
-void World::AddCamera(const Camera& camera, const Pose& pose) {
+void World::AddCamera(const Camera& camera, const geometry::Pose& pose) {
     cameras_.push_back({pose, camera});
 }
 
@@ -18,4 +19,5 @@ const std::vector<PosedCamera>& World::GetCameras() const {
     return cameras_;
 }
 
-}  // namespace scene
+}  // namespace kernel
+}  // namespace project

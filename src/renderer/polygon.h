@@ -3,11 +3,14 @@
 #include <point.h>
 #include <color.h>
 
-namespace geometry {
+namespace project {
+
+namespace kernel {
 
 struct Polygon {
-    Point3d a, b, c;
+    geometry::Point3d a, b, c;
     Color color;
 };
 
 }  // namespace geometry
+}  // namespace project
