@@ -5,7 +5,7 @@ namespace kernel {
 
 Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
-    geometry::Coordinate depth_ = camera.FarPlane - camera.NearPlane;
+    geometry::Coordinate depth_ = camera.GetDepth();
     Height height = screen.GetHeight();
     Width width = screen.GetWidth();
     z_buffer_.assign(height, std::vector<BufferPoint>(width, {depth_, background_color}));
@@ -41,27 +41,10 @@ geometry::Point3d Renderer::MoveToViewerCoordinates(const geometry::Point3d& poi
     return viewer_pose.rot_matrix.inverse() * (point - viewer_pose.pos_vector);
 }
 
-// Пока что тупо проецируем на NearPlane. Потом перепишем на перспективную проекцию
-geometry::Point3d Renderer::ProjectToCamera(const geometry::Point3d& point, const Camera& camera) {
-    auto n = camera.NearPlane;
-    auto f = camera.FarPlane;
-    auto l = -camera.LeftSide;
-    auto r = camera.RightSide;
-    auto t = camera.TopSide;
-    auto b = -camera.BottomSide;
-    geometry::Matrix4d project_matrix{{2 * n / (r - l), 0, (r + l) / (r - l), 0},
-                                      {0, 2 * n / (t - b), (t + b) / (t - b), 0},
-                                      {0, 0, -(f + n) / (f - n), -2 * n * f / (f - n)},
-                                      {0, 0, -1, 0}};
-    geometry::Vector4d p = project_matrix * geometry::Vector4d{point.x(), point.y(), point.z(), 1};
-    auto w = p(3, 0);
-    return {p.x() / w, p.y() / w, p.z() / w};
-}
-
 geometry::Point3d Renderer::LocalToCamera(const geometry::Point3d& point,
                                           const geometry::Pose& pose, const PosedCamera& camera) {
-    return ProjectToCamera(MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera),
-                           camera);
+    return camera.ProjectPointOnMe(
+        MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera));
 }
 
 Polygon Renderer::LocalToCamera(const Polygon& polygon, const geometry::Pose& pose,

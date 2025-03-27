@@ -31,7 +31,6 @@ private:
                                               const geometry::Pose& pose);
     geometry::Point3d MoveToViewerCoordinates(const geometry::Point3d& point,
                                               const geometry::Pose& viewer_pose);
-    geometry::Point3d ProjectToCamera(const geometry::Point3d& point, const Camera& camera);
     geometry::Point3d LocalToCamera(const geometry::Point3d& point, const geometry::Pose& pose,
                                     const PosedCamera& camera);
     Polygon LocalToCamera(const Polygon& polygon, const geometry::Pose& pose,

@@ -9,6 +9,7 @@ add_executable(3D-renderer
     src/renderer/color.cpp
     src/renderer/object.cpp 
     src/geometry/pose.cpp
+    src/renderer/camera.cpp
     src/renderer/renderer.cpp
     src/renderer/screen.cpp
     src/renderer/world.cpp
