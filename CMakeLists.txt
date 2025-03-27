@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(3D-renderer)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 add_executable(3D-renderer
     src/application/main.cpp 
     src/geometry/color.cpp
