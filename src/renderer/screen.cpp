@@ -4,7 +4,7 @@
 namespace project {
 namespace kernel {
 
-Screen::Screen(Height h, Width w) : data_(h, std::vector<Color>(w)) {
+Screen::Screen(Height h, Width w) : data_(h, w) {
     assert(h > 0 && w > 0 && "Screen size must be positive");
 }
 
@@ -13,7 +13,7 @@ TGAImage Screen::ConvertToTGA() {
 
     for (int y = 0; y < GetHeight(); ++y) {
         for (int x = 0; x < GetWidth(); ++x) {
-            const auto& pixel_color = data_[y][x];
+            const auto& pixel_color = data_.Get(y, x);
             image.set(x, y, TGAColor(pixel_color.r, pixel_color.g, pixel_color.b, 255));
         }
     }
@@ -22,15 +22,15 @@ TGAImage Screen::ConvertToTGA() {
 }
 
 void Screen::SetPixel(Height y, Width x, Color col) {
-    data_[y][x] = col;
+    data_.Get(y, x) = col;
 }
 
 Height Screen::GetHeight() {
-    return Height(data_.size());
+    return Height(data_.GetHeight());
 }
 
 Width Screen::GetWidth() {
-    return Width(data_[0].size());
+    return Width(data_.GetWidth());
 }
 
 }  // namespace kernel

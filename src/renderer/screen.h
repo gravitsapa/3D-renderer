@@ -4,6 +4,7 @@
 #include <color.h>
 #include <orientation.h>
 #include <tgaimage.h>
+#include <table.h>
 
 namespace project {
 namespace kernel {
@@ -19,7 +20,7 @@ public:
     TGAImage ConvertToTGA();
 
 private:
-    std::vector<std::vector<Color>> data_;
+    structures::Table<Color> data_;
 };
 
 }  // namespace kernel
