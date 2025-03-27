@@ -31,9 +31,9 @@ private:
                                               const geometry::Pose& pose);
     geometry::Point3d MoveToViewerCoordinates(const geometry::Point3d& point,
                                               const geometry::Pose& viewer_pose);
-    geometry::Point3d LocalToCamera(const geometry::Point3d& point, const geometry::Pose& pose,
+    geometry::Point3d ConvertCooridnatesPipeline(const geometry::Point3d& point, const geometry::Pose& pose,
                                     const PosedCamera& camera);
-    Triangle LocalToCamera(const Triangle& polygon, const geometry::Pose& pose,
+    Triangle ConvertCooridnatesPipeline(const Triangle& polygon, const geometry::Pose& pose,
                           const PosedCamera& camera);
     RasterPoint CameraToScreen(const geometry::Point3d point, Height height, Width width);
 

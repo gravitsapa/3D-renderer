@@ -11,7 +11,7 @@ Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&&
 
     for (auto& object : world.GetObjects()) {
         for (auto& polygon : object.GetPolygons()) {
-            Triangle polygon_in_camera_space = LocalToCamera(polygon, object, camera);
+            Triangle polygon_in_camera_space = ConvertCooridnatesPipeline(polygon, object, camera);
             auto clipped_polygons = Clip(polygon_in_camera_space);
             for (auto& clipped_polygon : clipped_polygons) {
                 PushToZBuffer(CameraToScreen(clipped_polygon.a, height, width),
@@ -40,18 +40,18 @@ geometry::Point3d Renderer::MoveToViewerCoordinates(const geometry::Point3d& poi
     return viewer_pose.rot_matrix.inverse() * (point - viewer_pose.pos_vector);
 }
 
-geometry::Point3d Renderer::LocalToCamera(const geometry::Point3d& point,
+geometry::Point3d Renderer::ConvertCooridnatesPipeline(const geometry::Point3d& point,
                                           const geometry::Pose& pose, const PosedCamera& camera) {
     return camera.ProjectPointOnMe(
         MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera));
 }
 
-Triangle Renderer::LocalToCamera(const Triangle& polygon, const geometry::Pose& pose,
+Triangle Renderer::ConvertCooridnatesPipeline(const Triangle& polygon, const geometry::Pose& pose,
                                 const PosedCamera& camera) {
     Triangle res = polygon;
-    res.a = LocalToCamera(res.a, pose, camera);
-    res.b = LocalToCamera(res.b, pose, camera);
-    res.c = LocalToCamera(res.c, pose, camera);
+    res.a = ConvertCooridnatesPipeline(res.a, pose, camera);
+    res.b = ConvertCooridnatesPipeline(res.b, pose, camera);
+    res.c = ConvertCooridnatesPipeline(res.c, pose, camera);
     return res;
 }
 
