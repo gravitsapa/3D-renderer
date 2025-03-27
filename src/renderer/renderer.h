@@ -17,8 +17,8 @@ struct RasterPoint {
 };
 
 struct BufferPoint {
-    geometry::Coordinate depth_;
-    Color col_;
+    geometry::Coordinate depth;
+    Color col;
 };
 
 class Renderer {
@@ -38,9 +38,7 @@ private:
     RasterPoint CameraToScreen(const geometry::Point3d point, Height height, Width width);
 
     bool InsideCamera(const geometry::Point3d& point);
-
     std::vector<Polygon> Clip(const Polygon& polygon);
-
     void PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col);
 
     std::vector<std::vector<BufferPoint>> z_buffer_;

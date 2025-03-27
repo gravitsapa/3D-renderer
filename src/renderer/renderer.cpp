@@ -5,10 +5,9 @@ namespace kernel {
 
 Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
-    geometry::Coordinate depth_ = camera.GetDepth();
     Height height = screen.GetHeight();
     Width width = screen.GetWidth();
-    z_buffer_.assign(height, std::vector<BufferPoint>(width, {depth_, background_color}));
+    z_buffer_.assign(height, std::vector<BufferPoint>(width, {camera.GetDepth(), background_color}));
 
     for (auto& object : world.GetObjects()) {
         for (auto& polygon : object.GetPolygons()) {
@@ -25,7 +24,7 @@ Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&&
 
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
-            screen.SetPixel(Height(i), Width(j), z_buffer_[i][j].col_);
+            screen.SetPixel(Height(i), Width(j), z_buffer_[i][j].col);
         }
     }
     return screen;
@@ -110,9 +109,9 @@ void Renderer::PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color 
         for (int x = alpha_x; x <= beta_x; x++) {
             geometry::Coordinate z =
                 alpha_z + (float)(x - alpha_x) / (beta_x - alpha_x) * (beta_z - alpha_z);
-            if (z < z_buffer_[y][x].depth_) {
-                z_buffer_[y][x].col_ = col;
-                z_buffer_[y][x].depth_ = z;
+            if (z < z_buffer_[y][x].depth) {
+                z_buffer_[y][x].col = col;
+                z_buffer_[y][x].depth = z;
             }
         }
     }

@@ -19,7 +19,7 @@ public:
     TGAImage ConvertToTGA();
 
 private:
-    std::vector<std::vector<Color>> matrix_;
+    std::vector<std::vector<Color>> data_;
 };
 
 }  // namespace kernel
