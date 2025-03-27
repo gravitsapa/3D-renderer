@@ -1,10 +1,10 @@
 #pragma once
 
-namespace application {
+namespace project {
 
 class Application {
 public:
     void Run(const char* filename);
 };
 
-}  // namespace application
+}  // namespace project

@@ -4,7 +4,7 @@
 #include <renderer.h>
 #include <tgaimage.h>
 
-namespace application {
+namespace project {
 void Application::Run(const char* filename) {
 
     scene::World world;
@@ -39,4 +39,4 @@ void Application::Run(const char* filename) {
     std::cout << "Renderer done" << std::endl;
 }
 
-}  // namespace application
+}  // namespace project
