@@ -22,9 +22,9 @@ Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&&
         }
     }
 
-    for (size_t i = 0; i < height; ++i) {
-        for (size_t j = 0; j < width; ++j) {
-            screen.GetMatrix()[i][j] = z_buffer_[i][j].col_;
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            screen.SetPixel(Height(i), Width(j), z_buffer_[i][j].col_);
         }
     }
     return screen;

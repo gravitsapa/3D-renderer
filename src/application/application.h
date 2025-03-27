@@ -2,6 +2,7 @@
 
 #include <string>
 #include <renderer.h>
+#include <tgaimage.h>
 
 namespace project {
 
@@ -15,8 +16,7 @@ public:
 private:
     std::string output_filename_;
     scene::World world_;
-    renderer::Height screen_height_;
-    renderer::Width screen_width_;
+    renderer::Screen screen_;
 };
 
 }  // namespace project

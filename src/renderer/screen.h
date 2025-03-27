@@ -3,6 +3,7 @@
 #include <vector>
 #include <color.h>
 #include <orientation.h>
+#include <tgaimage.h>
 
 namespace renderer {
 
@@ -10,13 +11,15 @@ using namespace geometry;
 
 class Screen {
 public:
-    void SetSize(Height h, Width w);
+    Screen(Height h, Width w);
+
+    TGAImage ConvertToTGA();
 
     Height GetHeight();
 
     Width GetWidth();
 
-    std::vector<std::vector<Color>>& GetMatrix();
+    void SetPixel(Height y, Width x, Color col);
 
 private:
     std::vector<std::vector<Color>> matrix_;
