@@ -3,8 +3,8 @@
 
 int main(int argc, char** argv) {
     try {
-        project::Application app;
-        app.Run(argv[1]);
+        project::Application app(argv[1], renderer::Height(400), renderer::Width(600));
+        app.Run();
     } catch (...) {
         except::react();
     }

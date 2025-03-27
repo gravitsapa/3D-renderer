@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(3D-renderer
-    src/application/main.cpp 
     src/geometry/color.cpp
     src/geometry/object.cpp 
     src/geometry/pose.cpp
@@ -14,6 +13,8 @@ add_executable(3D-renderer
     src/renderer/screen.cpp
     src/world/world.cpp
     src/application/application.cpp
+    src/application/except.cpp 
+    src/application/main.cpp 
     include/tgaimage/tgaimage.cpp
     )
 
@@ -23,3 +24,4 @@ target_include_directories(3D-renderer PRIVATE src/application)
 target_include_directories(3D-renderer PRIVATE src/geometry)
 target_include_directories(3D-renderer PRIVATE src/renderer)
 target_include_directories(3D-renderer PRIVATE src/world)
+target_include_directories(3D-renderer PRIVATE src/except)
