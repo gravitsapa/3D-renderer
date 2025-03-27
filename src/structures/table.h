@@ -11,9 +11,11 @@ class Table {
 public:
     Table() = default;
     Table(size_t h, size_t w);
+    Table(size_t h, size_t w, const T& value);
 
     T Get(size_t x, size_t y) const;
     T& Get(size_t x, size_t y);
+    void Fill(const T& value);
 
     size_t GetHeight();
     size_t GetWidth();
@@ -30,6 +32,11 @@ Table<T>::Table(size_t h, size_t w) : height_(h), width_(w), data_(h * w) {
 }
 
 template <class T>
+Table<T>::Table(size_t h, size_t w, const T& value) : height_(h), width_(w), data_(h * w, value) {
+    assert(h > 0 && w > 0 && "Size must be positive");
+}
+
+template <class T>
 T Table<T>::Get(size_t x, size_t y) const {
     assert(x < height_ && y < width_ && "Incorrect indexes");
     return data_[x * width_ + y];
@@ -39,6 +46,11 @@ template <class T>
 T& Table<T>::Get(size_t x, size_t y) {
     assert(x < height_ && y < width_ && "Incorrect indexes");
     return data_[x * width_ + y];
+}
+
+template <class T>
+void Table<T>::Fill(const T& value) {
+    data_.assign(height_ * width_, value);
 }
 
 template <class T>

@@ -25,6 +25,10 @@ void Screen::SetPixel(Height y, Width x, Color col) {
     data_.Get(y, x) = col;
 }
 
+void Screen::Fill(Color col) {
+    data_.Fill(col);
+}
+
 Height Screen::GetHeight() {
     return Height(data_.GetHeight());
 }

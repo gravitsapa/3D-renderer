@@ -6,19 +6,32 @@
 #include <polygon.h>
 #include <vector>
 #include <orientation.h>
+#include <table.h>
 
 namespace project {
 namespace kernel {
 
+using RasterCoordinate = int;
+
 struct RasterPoint {
-    int x;
-    int y;
+    RasterCoordinate x;
+    RasterCoordinate y;
     geometry::Coordinate z;
 };
 
 struct BufferPoint {
     geometry::Coordinate depth;
     Color col;
+};
+
+class ZBuffer {
+public:
+    ZBuffer(Height height, Width width, geometry::Coordinate depth);
+
+    bool TryToAddNewPixel(const RasterPoint& point);
+
+private:
+    structures::Table<geometry::Coordinate> buffer_;
 };
 
 class Renderer {
@@ -31,17 +44,18 @@ private:
                                               const geometry::Pose& pose);
     geometry::Point3d MoveToViewerCoordinates(const geometry::Point3d& point,
                                               const geometry::Pose& viewer_pose);
-    geometry::Point3d ConvertCooridnatesPipeline(const geometry::Point3d& point, const geometry::Pose& pose,
-                                    const PosedCamera& camera);
+    geometry::Point3d ConvertCooridnatesPipeline(const geometry::Point3d& point,
+                                                 const geometry::Pose& pose,
+                                                 const PosedCamera& camera);
     Triangle ConvertCooridnatesPipeline(const Triangle& polygon, const geometry::Pose& pose,
-                          const PosedCamera& camera);
+                                        const PosedCamera& camera);
     RasterPoint CameraToScreen(const geometry::Point3d point, Height height, Width width);
 
     bool InsideCamera(const geometry::Point3d& point);
     std::vector<Triangle> Clip(const Triangle& polygon);
-    void PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col);
-
-    std::vector<std::vector<BufferPoint>> z_buffer_;
+    void RasterizeTriangle(RasterPoint a, RasterPoint b, RasterPoint c, Color col, ZBuffer& buffer,
+                           Screen& screen);
+    bool TryToAddNewRasterPoint(RasterPoint point, Color col, ZBuffer& buffer, Screen& screen);
 };
 
 }  // namespace kernel

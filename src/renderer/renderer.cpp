@@ -3,30 +3,40 @@
 namespace project {
 namespace kernel {
 
+ZBuffer::ZBuffer(Height height, Width width, geometry::Coordinate depth)
+    : buffer_(height, width, depth) {
+}
+
+bool ZBuffer::TryToAddNewPixel(const RasterPoint& point) {
+    auto& depth = buffer_.Get(point.y, point.x);
+    if (point.z >= depth) {
+        return false;
+    }
+
+    depth = point.z;
+    return true;
+}
+
 Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
-    Height height = screen.GetHeight();
     Width width = screen.GetWidth();
-    z_buffer_.assign(height, std::vector<BufferPoint>(width, {camera.GetDepth(), background_color}));
+    Height height = screen.GetHeight();
+    ZBuffer buffer(screen.GetHeight(), width, height);
+    screen.Fill(background_color);
 
     for (auto& object : world.GetObjects()) {
         for (auto& polygon : object.GetPolygons()) {
             Triangle polygon_in_camera_space = ConvertCooridnatesPipeline(polygon, object, camera);
             auto clipped_polygons = Clip(polygon_in_camera_space);
             for (auto& clipped_polygon : clipped_polygons) {
-                PushToZBuffer(CameraToScreen(clipped_polygon.a, height, width),
-                              CameraToScreen(clipped_polygon.b, height, width),
-                              CameraToScreen(clipped_polygon.c, height, width),
-                              clipped_polygon.color);
+                RasterizeTriangle(CameraToScreen(clipped_polygon.a, height, width),
+                                  CameraToScreen(clipped_polygon.b, height, width),
+                                  CameraToScreen(clipped_polygon.c, height, width),
+                                  clipped_polygon.color, buffer, screen);
             }
         }
     }
 
-    for (int i = 0; i < height; ++i) {
-        for (int j = 0; j < width; ++j) {
-            screen.SetPixel(Height(i), Width(j), z_buffer_[i][j].col);
-        }
-    }
     return screen;
 }
 
@@ -41,13 +51,14 @@ geometry::Point3d Renderer::MoveToViewerCoordinates(const geometry::Point3d& poi
 }
 
 geometry::Point3d Renderer::ConvertCooridnatesPipeline(const geometry::Point3d& point,
-                                          const geometry::Pose& pose, const PosedCamera& camera) {
+                                                       const geometry::Pose& pose,
+                                                       const PosedCamera& camera) {
     return camera.ProjectPointOnMe(
         MoveToViewerCoordinates(MoveToGlobalCoordinates(point, pose), camera));
 }
 
 Triangle Renderer::ConvertCooridnatesPipeline(const Triangle& polygon, const geometry::Pose& pose,
-                                const PosedCamera& camera) {
+                                              const PosedCamera& camera) {
     Triangle res = polygon;
     res.a = ConvertCooridnatesPipeline(res.a, pose, camera);
     res.b = ConvertCooridnatesPipeline(res.b, pose, camera);
@@ -75,7 +86,8 @@ RasterPoint Renderer::CameraToScreen(const geometry::Point3d point, Height heigh
 }
 
 // пока что примитивная растеризация
-void Renderer::PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color col) {
+void Renderer::RasterizeTriangle(RasterPoint a, RasterPoint b, RasterPoint c, Color col,
+                                 ZBuffer& buffer, Screen& screen) {
     if (a.y > b.y)
         std::swap(a, b);
     if (b.y > c.y)
@@ -109,12 +121,18 @@ void Renderer::PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color 
         for (int x = alpha_x; x <= beta_x; x++) {
             geometry::Coordinate z =
                 alpha_z + (float)(x - alpha_x) / (beta_x - alpha_x) * (beta_z - alpha_z);
-            if (z < z_buffer_[y][x].depth) {
-                z_buffer_[y][x].col = col;
-                z_buffer_[y][x].depth = z;
-            }
+            TryToAddNewRasterPoint(RasterPoint{x, y, z}, col, buffer, screen);
         }
     }
+}
+
+bool Renderer::TryToAddNewRasterPoint(RasterPoint point, Color col, ZBuffer& buffer, Screen& screen) {
+    if (!buffer.TryToAddNewPixel(point)) {
+        return false;
+    }
+
+    screen.SetPixel(Height(point.y), Width(point.x), col);
+    return true;
 }
 
 }  // namespace kernel
