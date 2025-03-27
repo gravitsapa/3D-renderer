@@ -3,7 +3,7 @@
 #include <point.h>
 
 namespace scene {
-    
+
 using namespace geometry;
 
 struct Camera {

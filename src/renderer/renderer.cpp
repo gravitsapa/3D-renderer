@@ -129,4 +129,4 @@ void Renderer::PushToZBuffer(RasterPoint a, RasterPoint b, RasterPoint c, Color 
     }
 }
 
-}  // namespace pipeline
+}  // namespace renderer

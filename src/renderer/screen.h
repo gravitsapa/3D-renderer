@@ -22,4 +22,4 @@ private:
     std::vector<std::vector<Color>> matrix_;
 };
 
-}  // namespace scene
+}  // namespace renderer

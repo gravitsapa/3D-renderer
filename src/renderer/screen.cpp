@@ -18,4 +18,4 @@ Width Screen::GetWidth() {
     return Width(matrix_[0].size());
 }
 
-}  // namespace pipeline
+}  // namespace renderer
