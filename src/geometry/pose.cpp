@@ -20,8 +20,5 @@ Rotation Rotation::ByAngles(const Coordinate& alpha, const Coordinate& beta,
                  {-sin_beta, cos_beta * sin_gamma, cos_beta * cos_gamma}}};
 }
 
-Pose::Pose(const Position& pos, const Rotation& rot) : Position(pos), Rotation(rot) {
-}
-
 }  // namespace geometry
 }  // namespace project

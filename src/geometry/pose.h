@@ -7,10 +7,10 @@ namespace project {
 namespace geometry {
 
 struct Rotation {
-    Matrix3d rot_matrix = Matrix3d::Identity();
-
     static Rotation ByAngles(const Coordinate& alpha, const Coordinate& beta,
                              const Coordinate& gamma);
+                             
+    Matrix3d rot_matrix = Matrix3d::Identity();
 };
 
 struct Position {
@@ -18,9 +18,6 @@ struct Position {
 };
 
 struct Pose : Rotation, Position {
-    Pose() = default;
-
-    Pose(const Position& pos, const Rotation& rot);
 };
 
 }  // namespace geometry
