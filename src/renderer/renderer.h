@@ -11,7 +11,8 @@ namespace project {
 namespace kernel {
 
 struct RasterPoint {
-    int x, y;
+    int x;
+    int y;
     geometry::Coordinate z;
 };
 

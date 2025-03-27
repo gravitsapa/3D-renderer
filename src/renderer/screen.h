@@ -15,9 +15,7 @@ public:
     TGAImage ConvertToTGA();
 
     Height GetHeight();
-
     Width GetWidth();
-
     void SetPixel(Height y, Width x, Color col);
 
 private:

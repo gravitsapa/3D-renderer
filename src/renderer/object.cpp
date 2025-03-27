@@ -12,10 +12,6 @@ const std::vector<Polygon>& Object::GetPolygons() const {
     return polygons_;
 }
 
-void Object::Clear() {
-    polygons_.clear();
-}
-
 Object Object::RectangularСuboid(const geometry::Point3d& center, geometry::Coordinate w,
                                  geometry::Coordinate h, geometry::Coordinate d) {
     w /= 2;
@@ -33,12 +29,12 @@ Object Object::RectangularСuboid(geometry::Coordinate w, geometry::Coordinate h
 Object Object::Parallelepiped(const geometry::Point3d& center, const geometry::Vector3d& w,
                               const geometry::Vector3d& h, const geometry::Vector3d d) {
     Object res;
-    res.Insert(Rectangle(center + w, h, d, Color::Random()));
-    res.Insert(Rectangle(center - w, h, d, Color::Random()));
-    res.Insert(Rectangle(center + h, w, d, Color::Random()));
-    res.Insert(Rectangle(center - h, w, d, Color::Random()));
-    res.Insert(Rectangle(center + d, h, w, Color::Random()));
-    res.Insert(Rectangle(center - d, h, w, Color::Random()));
+    res.Merge(Rectangle(center + w, h, d, Color::Random()));
+    res.Merge(Rectangle(center - w, h, d, Color::Random()));
+    res.Merge(Rectangle(center + h, w, d, Color::Random()));
+    res.Merge(Rectangle(center - h, w, d, Color::Random()));
+    res.Merge(Rectangle(center + d, h, w, Color::Random()));
+    res.Merge(Rectangle(center - d, h, w, Color::Random()));
     return res;
 }
 
@@ -57,15 +53,9 @@ Object Object::Triangle(const geometry::Point3d& a, const geometry::Point3d& b,
     return res;
 }
 
-void Object::Insert(Object&& rhs) {
-    if (polygons_.size() > rhs.polygons_.size()) {
-        polygons_.swap(rhs.polygons_);
-    }
-
-    while (!rhs.polygons_.empty()) {
-        polygons_.push_back(rhs.polygons_.back());
-        rhs.polygons_.pop_back();
-    }
+void Object::Merge(Object&& rhs) {
+    polygons_.insert(polygons_.end(), rhs.polygons_.begin(), rhs.polygons_.end());
+    rhs.polygons_.clear();
 }
 
 }  // namespace kernel
