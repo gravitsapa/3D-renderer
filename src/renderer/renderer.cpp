@@ -17,29 +17,6 @@ bool ZBuffer::TryToAddNewPixel(const RasterPoint& point) {
     return true;
 }
 
-Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
-                         const Color& background_color) {
-    Width width = screen.GetWidth();
-    Height height = screen.GetHeight();
-    ZBuffer buffer(screen.GetHeight(), width, height);
-    screen.Fill(background_color);
-
-    for (auto& object : world.GetObjects()) {
-        for (auto& polygon : object.GetPolygons()) {
-            Triangle polygon_in_camera_space = ConvertCooridnatesPipeline(polygon, object, camera);
-            auto clipped_polygons = Clip(polygon_in_camera_space);
-            for (auto& clipped_polygon : clipped_polygons) {
-                RasterizeTriangle(CameraToScreen(clipped_polygon.a, height, width),
-                                  CameraToScreen(clipped_polygon.b, height, width),
-                                  CameraToScreen(clipped_polygon.c, height, width),
-                                  clipped_polygon.color, buffer, screen);
-            }
-        }
-    }
-
-    return screen;
-}
-
 geometry::Point3d Renderer::MoveToGlobalCoordinates(const geometry::Point3d& point,
                                                     const geometry::Pose& pose) {
     return pose.rot_matrix * point + pose.pos_vector;
@@ -85,6 +62,44 @@ RasterPoint Renderer::CameraToScreen(const geometry::Point3d point, Height heigh
             static_cast<int>((point.y() + 1) * height / 2), point.z()};
 }
 
+Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
+                         const Color& background_color) {
+    ZBuffer buffer(screen.GetHeight(), screen.GetWidth(), camera.GetDepth());
+    screen.Fill(background_color);
+
+    RasterizeWorld(world, buffer, screen, camera);
+
+    return screen;
+}
+
+void Renderer::RasterizeWorld(const World& world, ZBuffer& buffer, Screen& screen,
+                              const PosedCamera& camera) {
+    for (auto& object : world.GetObjects()) {
+        RasterizeObject(object, buffer, screen, camera);
+    }
+}
+
+void Renderer::RasterizeObject(const PosedObject& object, ZBuffer& buffer, Screen& screen,
+                               const PosedCamera& camera) {
+    for (auto& triangle : object.GetPolygons()) {
+        RasterizeTriangle(triangle, object, buffer, screen, camera);
+    }
+}
+
+void Renderer::RasterizeTriangle(const Triangle& triangle, const geometry::Pose& pose, ZBuffer& buffer, Screen& screen,
+                                 const PosedCamera& camera) {
+    Triangle triangle_in_camera_space = ConvertCooridnatesPipeline(triangle, pose, camera);
+    auto clipped_polygons = Clip(triangle_in_camera_space);
+    for (auto& clipped_polygon : clipped_polygons) {
+        auto height = screen.GetHeight();
+        auto width = screen.GetWidth();
+        RasterizeTriangle(CameraToScreen(clipped_polygon.a, height, width),
+                          CameraToScreen(clipped_polygon.b, height, width),
+                          CameraToScreen(clipped_polygon.c, height, width), clipped_polygon.color,
+                          buffer, screen);
+    }
+}
+
 // пока что примитивная растеризация
 void Renderer::RasterizeTriangle(RasterPoint a, RasterPoint b, RasterPoint c, Color col,
                                  ZBuffer& buffer, Screen& screen) {
@@ -126,7 +141,8 @@ void Renderer::RasterizeTriangle(RasterPoint a, RasterPoint b, RasterPoint c, Co
     }
 }
 
-bool Renderer::TryToAddNewRasterPoint(RasterPoint point, Color col, ZBuffer& buffer, Screen& screen) {
+bool Renderer::TryToAddNewRasterPoint(RasterPoint point, Color col, ZBuffer& buffer,
+                                      Screen& screen) {
     if (!buffer.TryToAddNewPixel(point)) {
         return false;
     }

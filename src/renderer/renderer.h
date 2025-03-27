@@ -53,6 +53,10 @@ private:
 
     bool InsideCamera(const geometry::Point3d& point);
     std::vector<Triangle> Clip(const Triangle& polygon);
+
+    void RasterizeWorld(const World& world, ZBuffer& buffer, Screen& screen, const PosedCamera& camera);
+    void RasterizeObject(const PosedObject& world, ZBuffer& buffer, Screen& screen, const PosedCamera& camera);
+    void RasterizeTriangle(const Triangle& triangle, const geometry::Pose& pose, ZBuffer& buffer, Screen& screen, const PosedCamera& camera);
     void RasterizeTriangle(RasterPoint a, RasterPoint b, RasterPoint c, Color col, ZBuffer& buffer,
                            Screen& screen);
     bool TryToAddNewRasterPoint(RasterPoint point, Color col, ZBuffer& buffer, Screen& screen);
