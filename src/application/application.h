@@ -14,9 +14,13 @@ public:
     void Run();
 
 private:
+    void LoadSampleScene();
+    void ShowScreen();
+
     sf::RenderWindow window_;
     kernel::World world_;
     kernel::Screen screen_;
+    kernel::Renderer renderer_;
 };
 
 }  // namespace application
