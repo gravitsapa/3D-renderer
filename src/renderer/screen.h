@@ -3,8 +3,8 @@
 #include <vector>
 #include <color.h>
 #include <orientation.h>
-#include <tgaimage.h>
 #include <table.h>
+#include <SFML/Graphics.hpp>
 
 namespace project {
 namespace kernel {
@@ -18,7 +18,7 @@ public:
     void SetPixel(Height y, Width x, Color col);
     void Fill(Color col);
 
-    TGAImage ConvertToTGA();
+    sf::Image ConvertToImage();
 
 private:
     structures::Table<Color> data_;

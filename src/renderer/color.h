@@ -1,6 +1,7 @@
 #pragma once
 
 #include <climits>
+#include <SFML/Graphics.hpp>
 
 namespace project {
 
@@ -20,6 +21,8 @@ struct Color {
     ChannelType g = 0;
     ChannelType b = 0;
 };
+
+sf::Color ConvertToSFMLColor(const Color& color);
 
 }  // namespace kernel
 

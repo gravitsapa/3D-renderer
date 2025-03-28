@@ -7,8 +7,8 @@ void World::AddObject(const Object& object, const geometry::Pose& pose) {
     objects_.push_back({pose, object});
 }
 
-void World::AddObject(Object&& object, const geometry::Pose& pose) {
-    objects_.emplace_back(pose, std::move(object));
+void World::AddObject(Object&& object, geometry::Pose&& pose) {
+    objects_.push_back({std::move(pose), std::move(object)});
 }
 
 void World::AddCamera(const Camera& camera, const geometry::Pose& pose) {

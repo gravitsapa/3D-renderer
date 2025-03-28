@@ -1,5 +1,6 @@
 #include <screen.h>
 #include <cassert>
+#include <SFML/Graphics.hpp>
 
 namespace project {
 namespace kernel {
@@ -8,16 +9,13 @@ Screen::Screen(Height h, Width w) : data_(h, w) {
     assert(h > 0 && w > 0 && "Screen size must be positive");
 }
 
-TGAImage Screen::ConvertToTGA() {
-    TGAImage image(GetWidth(), GetHeight(), TGAImage::RGB);
-
-    for (int y = 0; y < GetHeight(); ++y) {
-        for (int x = 0; x < GetWidth(); ++x) {
-            const auto& pixel_color = data_.Get(y, x);
-            image.set(x, y, TGAColor(pixel_color.r, pixel_color.g, pixel_color.b, 255));
+sf::Image Screen::ConvertToImage() {
+    sf::Image image({GetWidth(), GetHeight()});
+    for (int x = 0; x < GetWidth(); ++x) {
+        for (int y = 0; y < GetHeight(); ++y) {
+            image.setPixel({x, y}, ConvertToSFMLColor(data_.Get(y, x)));
         }
     }
-
     return image;
 }
 

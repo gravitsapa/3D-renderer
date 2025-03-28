@@ -1,9 +1,14 @@
 #include <color.h>
 #include <cstdlib>
+#include <SFML/Graphics.hpp>
 
 namespace project {
 
 namespace kernel {
+
+sf::Color ConvertToSFMLColor(const Color& color) {
+    return sf::Color(color.r, color.g, color.b);
+}
 
 Color Color::White() {
     return {kChannelMax, kChannelMax, kChannelMax};
@@ -27,6 +32,6 @@ Color Color::Random() {
             static_cast<ChannelType>(std::rand() % kChannelMax)};
 }
 
-}  // namespace geometry
+}  // namespace kernel
 
 }  // namespace project

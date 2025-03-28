@@ -2,20 +2,19 @@
 
 #include <string>
 #include <renderer.h>
-#include <tgaimage.h>
+#include <SFML/Graphics.hpp>
 
 namespace project {
 namespace application {
 
 class Application {
 public:
-    Application(const std::string& output_filename, kernel::Height screen_height,
-                kernel::Width screen_width);
+    Application(kernel::Height screen_height, kernel::Width screen_width);
 
     void Run();
 
 private:
-    std::string output_filename_;
+    sf::RenderWindow window_;
     kernel::World world_;
     kernel::Screen screen_;
 };
