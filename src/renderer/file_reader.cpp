@@ -5,6 +5,10 @@
 #include <point.h>
 #include <object.h>
 #include <type_traits>
+#include <cmath>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
 
 namespace project {
 namespace kernel {
@@ -46,6 +50,14 @@ geometry::Vector3d ReadVector3D(std::stringstream& stream) {
 TextureCoordinates ReadTextureCoordinates(std::stringstream& stream) {
     TextureCoordinates coordinates;
     stream >> coordinates.h >> coordinates.w;
+    coordinates.h -= std::floor(coordinates.h);
+    coordinates.w -= std::floor(coordinates.w);
+
+    coordinates.w = 1 - coordinates.w;
+    std::swap(coordinates.h, coordinates.w);
+
+    assert(0 <= coordinates.h && coordinates.h <= 1);
+    assert(0 <= coordinates.w && coordinates.w <= 1);
     return coordinates;
 }
 
@@ -148,9 +160,24 @@ Mesh3d ReadMeshFromFile(const std::string& filename) {
     return Mesh3d(faces);
 }
 
-//пока что возвращаем дефолтную
+// пока что возвращаем дефолтную
 Texture ReadTextureFromFile(const std::string& filename) {
-    return Texture();
+    auto image = cv::imread(filename, cv::IMREAD_COLOR);
+    if (image.empty()) {
+        throw std::runtime_error("Cannot read texture");
+    }
+
+    Texture texture;
+    texture.data_ = structures::Table<Color>(image.rows, image.cols);
+    for (int i = 0; i < image.rows; ++i) {
+        for (int j = 0; j < image.cols; ++j) {
+            cv::Vec3b bgr_pixel = image.at<cv::Vec3b>(i, j);
+            texture.data_.Get(i, j) =
+                Color{.r = bgr_pixel.val[2], .g = bgr_pixel.val[1], .b = bgr_pixel.val[0]};
+        }
+    }
+
+    return texture;
 }
 
 }  // namespace kernel

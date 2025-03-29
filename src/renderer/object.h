@@ -17,6 +17,8 @@ struct TextureCoordinates {
 };
 
 class Texture {
+    friend Texture ReadTextureFromFile(const std::string& filename);
+
 public:
     Texture();
 

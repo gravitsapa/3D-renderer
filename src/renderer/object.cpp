@@ -22,7 +22,8 @@ ColoredVertex CreateColoredVertex(const Vertex& vertex, const Texture& texture) 
 }
 
 TextureCoordinate Texture::MoveTo01Segment(TextureCoordinate x) const {
-    return x + std::floor(x);
+    assert(0 <= x && x <= 1);
+    return x;
 }
 
 Texture::Texture() : data_(1, 1, Color::Random()) {

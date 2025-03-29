@@ -24,9 +24,9 @@ void Application::LoadSampleScene() {
 
     world_.AddObject(
         plant,
-        geometry::Pose{geometry::Rotation(), geometry::Position{geometry::Vector3d{0, 0, -40}}});
+        geometry::Pose{geometry::Rotation::ByAngles(3.14, 1, 0), geometry::Position{geometry::Vector3d{0, 30, -50}}});
 
-    world_.AddCamera(kernel::Camera{30, 200, 100, 100, 75, 75});
+    world_.AddCamera(kernel::Camera{40, 150, 100, 100, 75, 75});
 }
 
 void Application::ShowScreen() {
