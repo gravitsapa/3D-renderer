@@ -30,9 +30,15 @@ geometry::Matrix4d Camera::GetProjectionMatrix() const {
                               {0, 0, -1, 0}};
 }
 
-geometry::Point3d Camera::ProjectPointOnMe(const geometry::Point3d& point) const {
-    return geometry::ConvertToPoint(GetProjectionMatrix() *
-                                    geometry::ConvertToHomogeneousPoint(point));
+Vertex Camera::ProjectVertexOnMe(const Vertex& vertex) const {
+    return Vertex{.point = geometry::ConvertToPoint(
+                      GetProjectionMatrix() * geometry::ConvertToHomogeneousPoint(vertex.point)),
+                  .normal = vertex.normal,
+                  .text_coord = vertex.text_coord};
+}
+
+Face Camera::ProjectFaceOnMe(const Face& face) const {
+    return Face{ProjectVertexOnMe(face.a), ProjectVertexOnMe(face.b), ProjectVertexOnMe(face.c)};
 }
 
 geometry::Coordinate Camera::GetDepth() const {

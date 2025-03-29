@@ -2,6 +2,7 @@
 #include <iostream>
 #include <world.h>
 #include <renderer.h>
+#include <file_reader.h>
 #include <SFML/Graphics.hpp>
 
 namespace project {
@@ -13,11 +14,19 @@ Application::Application(kernel::Height screen_height, kernel::Width screen_widt
 }
 
 void Application::LoadSampleScene() {
-    world_.AddObject(kernel::Object::CreateRectangularСuboid(130, 100, 150),
-                     geometry::Pose{geometry::Rotation::ByAngles(0, 0.75, 0.75),
-                                    geometry::Position{geometry::Vector3d{0, 0, -200}}});
+    std::string object_folder_path = "../objects/";
+    std::string plant_mesh_path = object_folder_path + "plant/object.obj";
+    std::string plant_texture_path = object_folder_path + "plant/texture.png";
+    auto plant = kernel::Object{kernel::ReadMeshFromFile(plant_mesh_path),
+                       kernel::ReadTextureFromFile(plant_texture_path)};
 
-    world_.AddCamera(kernel::Camera{50, 500, 200, 200, 150, 150});
+    kernel::PrintDebugInfo(plant, "PLANT");
+
+    world_.AddObject(
+        plant,
+        geometry::Pose{geometry::Rotation(), geometry::Position{geometry::Vector3d{0, 0, -40}}});
+
+    world_.AddCamera(kernel::Camera{30, 200, 100, 100, 75, 75});
 }
 
 void Application::ShowScreen() {

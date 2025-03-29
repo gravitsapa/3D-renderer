@@ -17,8 +17,8 @@ public:
     T& Get(size_t x, size_t y);
     void Fill(const T& value);
 
-    size_t GetHeight();
-    size_t GetWidth();
+    size_t GetHeight() const;
+    size_t GetWidth() const;
 
 private:
     std::vector<T> data_;
@@ -54,12 +54,12 @@ void Table<T>::Fill(const T& value) {
 }
 
 template <class T>
-size_t Table<T>::GetHeight() {
+size_t Table<T>::GetHeight() const {
     return height_;
 }
 
 template <class T>
-size_t Table<T>::GetWidth() {
+size_t Table<T>::GetWidth() const {
     return width_;
 }
 

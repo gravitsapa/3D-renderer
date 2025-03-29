@@ -15,6 +15,7 @@ add_executable(3D-renderer
     src/renderer/renderer.cpp
     src/renderer/screen.cpp
     src/renderer/world.cpp
+    src/renderer/file_reader.cpp
     src/application/application.cpp
     src/application/except.cpp 
     src/application/main.cpp 

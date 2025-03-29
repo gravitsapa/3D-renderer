@@ -1,61 +1,77 @@
 #include <object.h>
+#include <cassert>
+#include <cmath>
+#include <iostream>
 
 namespace project {
-
 namespace kernel {
 
-void Object::AddPolygon(const Triangle& polygon) {
-    polygons_.push_back(polygon);
+// нужно дописать алгоритм для нормали
+Vertex WeightedSum(const Vertex& a, const Vertex& b, Factor alpha) {
+    return Vertex{
+        .point = (a.point * (1 - alpha) + b.point * alpha),
+        .normal = a.normal,
+        .text_coord = TextureCoordinates{a.text_coord.h * (1 - alpha) + b.text_coord.h * alpha,
+                                         a.text_coord.w * (1 - alpha) + b.text_coord.w * alpha}};
 }
 
-const std::vector<Triangle>& Object::GetPolygons() const {
-    return polygons_;
+ColoredVertex CreateColoredVertex(const Vertex& vertex, const Texture& texture) {
+    return ColoredVertex{.point = vertex.point,
+                         .normal = vertex.normal,
+                         .col = texture.GetPixelColor(vertex.text_coord)};
 }
 
-Object Object::CreateRectangularСuboid(const geometry::Point3d& center, geometry::Coordinate w,
-                                 geometry::Coordinate h, geometry::Coordinate d) {
-    w /= 2;
-    h /= 2;
-    d /= 2;
-
-    return CreateParallelepiped(center, {w, 0, 0}, {0, h, 0}, {0, 0, d});
+TextureCoordinate Texture::MoveTo01Segment(TextureCoordinate x) const {
+    return x + std::floor(x);
 }
 
-Object Object::CreateRectangularСuboid(geometry::Coordinate w, geometry::Coordinate h,
-                                 geometry::Coordinate d) {
-    return CreateRectangularСuboid(geometry::Point3d(), w, h, d);
+Texture::Texture() : data_(1, 1, Color::Random()) {
 }
 
-Object Object::CreateParallelepiped(const geometry::Point3d& center, const geometry::Vector3d& w,
-                              const geometry::Vector3d& h, const geometry::Vector3d d) {
-    Object res;
-    res.Merge(CreateRectangle(center + w, h, d, Color::Random()));
-    res.Merge(CreateRectangle(center - w, h, d, Color::Random()));
-    res.Merge(CreateRectangle(center + h, w, d, Color::Random()));
-    res.Merge(CreateRectangle(center - h, w, d, Color::Random()));
-    res.Merge(CreateRectangle(center + d, h, w, Color::Random()));
-    res.Merge(CreateRectangle(center - d, h, w, Color::Random()));
-    return res;
+int Texture::ConvertToIndexH(TextureCoordinate h) const {
+    h = MoveTo01Segment(h);
+    return static_cast<int>(h * (data_.GetHeight() - 1));
 }
 
-Object Object::CreateRectangle(const geometry::Point3d& center, const geometry::Vector3d& h,
-                         const geometry::Vector3d& w, const Color& color) {
-    Object res;
-    res.AddPolygon({center + h + w, center - h - w, center + h - w, color});
-    res.AddPolygon({center + h + w, center - h - w, center - h + w, color});
-    return res;
+int Texture::ConvertToIndexW(TextureCoordinate w) const {
+    w = MoveTo01Segment(w);
+    return static_cast<int>(w * (data_.GetWidth() - 1));
 }
 
-Object Object::CreateTriangle(const geometry::Point3d& a, const geometry::Point3d& b,
-                        const geometry::Point3d& c, const Color& color) {
-    Object res;
-    res.AddPolygon({a, b, c, color});
-    return res;
+Color Texture::GetPixelColor(TextureCoordinates coord) const {
+    assert(data_.GetHeight() > 0 && data_.GetWidth() > 0);
+    return data_.Get(ConvertToIndexH(coord.h), ConvertToIndexW(coord.w));
 }
 
-void Object::Merge(Object&& rhs) {
-    polygons_.insert(polygons_.end(), rhs.polygons_.begin(), rhs.polygons_.end());
-    rhs.polygons_.clear();
+const std::vector<Face>& Mesh3d::GetAllFaces() const {
+    return faces_;
+}
+
+Mesh3d::Mesh3d(std::vector<Face> faces) : faces_(std::move(faces)) {
+}
+
+void PrintDebugInfo(const Object& object, const std::string& object_name) {
+    std::cerr << "DEBUG INFO ABOUT OBJECT: " << object_name << std::endl;
+    const auto& faces = object.mesh.GetAllFaces();
+    std::cerr << "Polygons count: " << faces.size() << std::endl;
+    geometry::Point3d min_point = faces[0].a.point;
+    geometry::Point3d max_point = faces[0].a.point;
+    for (auto& face : faces) {
+        for (auto& ver : {face.a, face.b, face.c}) {
+            min_point.x() = std::min(min_point.x(), ver.point.x());
+            min_point.y() = std::min(min_point.y(), ver.point.y());
+            min_point.z() = std::min(min_point.z(), ver.point.z());
+
+            max_point.x() = std::max(max_point.x(), ver.point.x());
+            max_point.y() = std::max(max_point.y(), ver.point.y());
+            max_point.z() = std::max(max_point.z(), ver.point.z());
+        }
+    }
+    std::cerr << "X from " << min_point.x() << " to " << max_point.x() << std::endl;
+    std::cerr << "Y from " << min_point.y() << " to " << max_point.y() << std::endl;
+    std::cerr << "Z from " << min_point.z() << " to " << max_point.z() << std::endl;
+    auto col = object.texture.GetPixelColor(TextureCoordinates{0, 0});
+    std::cerr << "Tex color: " << (int)col.r << ' ' << (int)col.g << ' ' << (int)col.b << std::endl;
 }
 
 }  // namespace kernel

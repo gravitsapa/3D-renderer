@@ -1,6 +1,6 @@
 #pragma once
 
-#include <point.h>
+#include <object.h>
 
 namespace project {
 namespace kernel {
@@ -13,7 +13,8 @@ public:
 
     geometry::Coordinate GetDepth() const;
 
-    geometry::Point3d ProjectPointOnMe(const geometry::Point3d& point) const;
+    Vertex ProjectVertexOnMe(const Vertex& vertex) const;
+    Face ProjectFaceOnMe(const Face& face) const;
 
     geometry::Matrix4d GetProjectionMatrix() const;
 
