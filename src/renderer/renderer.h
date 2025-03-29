@@ -13,7 +13,7 @@ namespace project {
 namespace kernel {
 
 using RasterCoordinate = long long;
-constexpr RasterCoordinate raster_depth_max = 1'000'000'000;
+constexpr RasterCoordinate raster_depth_max = 1'000'000'000'000;
 
 struct RasterPoint3d {
     RasterCoordinate x;

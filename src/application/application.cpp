@@ -10,23 +10,33 @@ namespace application {
 Application::Application(kernel::Height screen_height, kernel::Width screen_width)
     : screen_(screen_height, screen_width),
       window_(sf::VideoMode({screen_width, screen_height}), "3D-renderer") {
-    LoadSampleScene();
+    LoadSceneWithCoffee();
 }
 
-void Application::LoadSampleScene() {
+void Application::LoadSceneWithCoffee() {
     std::string object_folder_path = "../objects/";
-    std::string plant_mesh_path = object_folder_path + "plant/object.obj";
-    std::string plant_texture_path = object_folder_path + "plant/texture.png";
+    std::string plant_mesh_path = object_folder_path + "coffee/object.obj";
+    std::string plant_texture_path = object_folder_path + "coffee/texture.png";
     auto plant = kernel::Object{kernel::ReadMeshFromFile(plant_mesh_path),
                        kernel::ReadTextureFromFile(plant_texture_path)};
 
-    kernel::PrintDebugInfo(plant, "PLANT");
+    kernel::PrintDebugInfo(plant, "COFFEE");
 
     world_.AddObject(
         plant,
-        geometry::Pose{geometry::Rotation::ByAngles(3.14, 1, 0), geometry::Position{geometry::Vector3d{0, 30, -50}}});
+        geometry::Pose{geometry::Rotation::ByAngles(3.14, 0, 0), geometry::Position{geometry::Vector3d{0, 0.5, -1}}});
 
-    world_.AddCamera(kernel::Camera{40, 150, 100, 100, 75, 75});
+    world_.AddCamera(kernel::Camera{0.5, 2, 1, 1, 0.75, 0.75});
+}
+
+void Application::LoadSceneWithCube() {
+    auto rec = kernel::Object{.mesh = kernel::Mesh3d::RectangularСuboid(100, 150, 200), .texture = kernel::Texture()};
+    kernel::PrintDebugInfo(rec, "RECTANGLE");
+    world_.AddObject(
+        rec,
+        geometry::Pose{geometry::Rotation::ByAngles(0, 0.75, 0.75), geometry::Position{geometry::Vector3d{0, 0, -200}}});
+
+    world_.AddCamera(kernel::Camera{50, 500, 200, 200, 150, 150});
 }
 
 void Application::ShowScreen() {

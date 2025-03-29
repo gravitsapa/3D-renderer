@@ -14,7 +14,8 @@ public:
     void Run();
 
 private:
-    void LoadSampleScene();
+    void LoadSceneWithCube();
+    void LoadSceneWithCoffee();
     void ShowScreen();
 
     sf::RenderWindow window_;

@@ -1,4 +1,5 @@
 #include <renderer.h>
+#include <iostream>
 
 namespace project {
 namespace kernel {
@@ -8,10 +9,16 @@ ZBuffer::ZBuffer(Height height, Width width, RasterCoordinate depth)
 }
 
 bool ZBuffer::TryToAddVertex(const RasterPoint3d& raster_point, const ColoredVertex& vertex) {
+    // std::cerr << "RastPoint " << raster_point.x << ',' << raster_point.y << ',' << raster_point.z
+    //           << " with color " << (int)vertex.col.r << ',' << (int)vertex.col.g << ','
+    //           << (int)vertex.col.b;
     auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
     if (buf_point.depth <= raster_point.z) {
+        // std::cerr << " SKIP" << std::endl;
         return false;
     }
+
+    // std::cerr << " OK" << std::endl;
 
     buf_point = BufferPoint{raster_point.z, vertex};
     return true;
@@ -138,7 +145,8 @@ geometry::Point3d ConvertToCoordinate(const RasterPoint3d& point, const RasterRe
 }
 
 // пока что примитивная растеризация
-void Renderer::RasterizeFace(const Face& face, const Texture& texture, ZBuffer& buffer, Screen& screen) {
+void Renderer::RasterizeFace(const Face& face, const Texture& texture, ZBuffer& buffer,
+                             Screen& screen) {
     Face sorted_face = SortVertexesInFaceByY(face);
 
     RasterResolution res{screen.GetWidth() - 1, screen.GetHeight() - 1, raster_depth_max};
@@ -149,6 +157,8 @@ void Renderer::RasterizeFace(const Face& face, const Texture& texture, ZBuffer& 
     if (ra.y == rc.y) {
         return;
     }
+
+    Color col_here = Color::Random();
 
     RasterCoordinate height = rc.y - ra.y;
     for (RasterCoordinate h = 0; h < height; ++h) {
@@ -184,8 +194,12 @@ void Renderer::RasterizeFace(const Face& face, const Texture& texture, ZBuffer& 
 
             Vertex real_vertex = WeightedSum(alpha_vertex, beta_vertex, gamma);
             ColoredVertex col_vertex = CreateColoredVertex(real_vertex, texture);
+            // ColoredVertex col_vertex = ColoredVertex{
+            //     .point = real_vertex.point, .normal = real_vertex.normal, .col = col_here};
 
-            buffer.TryToAddVertex(ConvertToRasterPoint(col_vertex.point, res), col_vertex);
+            buffer.TryToAddVertex(
+                RasterPoint3d{x, y, ConvertToRasterCoordinate(col_vertex.point.z(), res.z_max)},
+                col_vertex);
         }
     }
 }
