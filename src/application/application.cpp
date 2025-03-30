@@ -24,10 +24,10 @@ void Application::LoadSceneWithCoffee() {
 
     world_.AddObject(
         plant,
-        geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.5, 0), geometry::Position{geometry::Vector3d{0, 0.2, -0.8}}});
+        geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.5, 0), geometry::Position{geometry::Vector3d{0, 0.4, -0.8}}});
 
-
-    world_.AddCamera(kernel::Camera{0.5, 2, 1, 1, 0.75, 0.75});
+    double f = 0.5;
+    world_.AddCamera(kernel::Camera{0.5, 2, f * 1, f * 1, f * 0.75, f * 0.75});
 
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));

@@ -7,11 +7,8 @@ namespace project {
 
 namespace kernel {
 
-using ChannelType = double;
-using ChannelChar = unsigned char;
-constexpr ChannelChar channel_char_max = UCHAR_MAX;
-
 struct Color {
+    using ChannelType = double;
     static constexpr ChannelType kChannelMax = 1;
 
     static Color White();
@@ -28,13 +25,19 @@ struct Color {
 
 Color operator+(const Color& col1, const Color& col2);
 Color operator*(const Color& col1, const Color& col2);
-Color operator*(const Color& col1, ChannelType factor);
+Color operator*(const Color& col1, Color::ChannelType factor);
 
-ChannelType ChannelByChar(ChannelChar alpha);
-ChannelChar CharByChannelType(ChannelType alpha);
+using ChannelChar = unsigned char;
+constexpr ChannelChar channel_char_max = UCHAR_MAX;
 
 Color ColorByChar(ChannelChar r, ChannelChar g, ChannelChar b);
 sf::Color ConvertToSFMLColor(const Color& color);
+
+namespace detail {
+Color::ChannelType ChannelByChar(ChannelChar alpha);
+ChannelChar CharByChannelType(Color::ChannelType alpha);
+}  // namespace detail
+
 
 }  // namespace kernel
 

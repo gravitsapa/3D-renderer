@@ -8,6 +8,12 @@
 namespace project {
 namespace kernel {
 
+Mesh3d ReadMeshFromFile(const std::string& filename);
+
+Texture ReadTextureFromFile(const std::string& filename);
+
+namespace detail {
+
 std::ifstream OpenFileStream(const std::string& filename);
 
 std::string ReadString(std::stringstream& stream);
@@ -37,10 +43,7 @@ Vertex CreateVectexFromIndexes(ObjFileVertexIndexes indexes,
                                const std::vector<geometry::Point3d>& points,
                                const std::vector<geometry::Vector3d>& normals,
                                const std::vector<TextureCoordinates>& tex_coords);
-
-Mesh3d ReadMeshFromFile(const std::string& filename);
-
-Texture ReadTextureFromFile(const std::string& filename);
+}  // namespace detail
 
 }  // namespace kernel
 }  // namespace project

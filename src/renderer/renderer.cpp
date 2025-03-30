@@ -5,62 +5,13 @@
 namespace project {
 namespace kernel {
 
-ZBuffer::ZBuffer(Height height, Width width, RasterCoordinate depth)
-    : buffer_(height, width, BufferPoint{depth, std::nullopt}) {
-}
-
-bool ZBuffer::TryToAddVertex(const RasterPoint3d& raster_point, const ColoredVertex& vertex) {
-    auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
-    if (buf_point.depth <= raster_point.z) {
-        return false;
-    }
-
-    buf_point = BufferPoint{raster_point.z, vertex};
-    return true;
-}
-
-Height ZBuffer::GetHeight() {
-    return Height(buffer_.GetHeight());
-}
-
-Width ZBuffer::GetWidth() {
-    return Width(buffer_.GetWidth());
-}
-
-std::optional<ColoredVertex>& ZBuffer::GetVertex(Height y, Width x) {
-    assert(0 <= y && y < buffer_.GetHeight() && 0 <= x && x < buffer_.GetWidth());
-    return buffer_.Get(y, x).vertex;
-}
-
-std::optional<ColoredVertex> ZBuffer::GetVertex(Height y, Width x) const {
-    assert(0 <= y && y < buffer_.GetHeight() && 0 <= x && x < buffer_.GetWidth());
-    return buffer_.Get(y, x).vertex;
-}
-
-Vertex MoveFromLocalToGlobalCoordinates(const Vertex& local_vertex, const geometry::Pose& pose) {
-    return Vertex{.point = pose.rot_matrix * local_vertex.point + pose.pos_vector,
-                  .normal = pose.rot_matrix * local_vertex.normal,
-                  .text_coord = local_vertex.text_coord};
-}
-
-Vertex MoveFromGlobalToViewerCoordinates(const Vertex& global_vertex,
-                                         const geometry::Pose& viewer_pose) {
+// нужно дописать алгоритм для нормали
+Vertex WeightedSum(const Vertex& a, const Vertex& b, Factor alpha) {
     return Vertex{
-        .point = viewer_pose.rot_matrix.inverse() * (global_vertex.point - viewer_pose.pos_vector),
-        .normal = viewer_pose.rot_matrix.inverse() * global_vertex.normal,
-        .text_coord = global_vertex.text_coord};
-}
-
-Face MoveFromLocalToGlobalCoordinates(const Face& local_face, const geometry::Pose& pose) {
-    return Face{MoveFromLocalToGlobalCoordinates(local_face.a, pose),
-                MoveFromLocalToGlobalCoordinates(local_face.b, pose),
-                MoveFromLocalToGlobalCoordinates(local_face.c, pose)};
-}
-
-Face MoveFromGlobalToViewerCoordinates(const Face& global_face, const geometry::Pose& viewer_pose) {
-    return Face{MoveFromGlobalToViewerCoordinates(global_face.a, viewer_pose),
-                MoveFromGlobalToViewerCoordinates(global_face.b, viewer_pose),
-                MoveFromGlobalToViewerCoordinates(global_face.c, viewer_pose)};
+        .point = (a.point * (1 - alpha) + b.point * alpha),
+        .normal = a.normal,
+        .text_coord = TextureCoordinates{a.text_coord.h * (1 - alpha) + b.text_coord.h * alpha,
+                                         a.text_coord.w * (1 - alpha) + b.text_coord.w * alpha}};
 }
 
 Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
@@ -115,8 +66,8 @@ void Renderer::RasterizeObject(const PosedObject& object, ZBuffer& buffer, Scree
 void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
                                      const geometry::Pose& pose, ZBuffer& buffer, Screen& screen,
                                      const PosedCamera& camera) {
-    Face global_face = MoveFromLocalToGlobalCoordinates(face, pose);
-    Face face_as_viewer_see = MoveFromGlobalToViewerCoordinates(global_face, camera);
+    Face global_face = detail::MoveFromLocalToGlobalCoordinates(face, pose);
+    Face face_as_viewer_see = detail::MoveFromGlobalToViewerCoordinates(global_face, camera);
     Face face_in_camera_space = camera.ProjectFaceOnMe(face_as_viewer_see);
 
     // пока что тупо выкидываем непопадающие треугольники
@@ -136,37 +87,17 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
     RasterizeFace(face_in_camera_space, global_face, texture, buffer, screen);
 }
 
-RasterCoordinate ConvertToRasterCoordinate(geometry::Coordinate coord, RasterCoordinate max_value) {
-    return static_cast<RasterCoordinate>((coord + 1) / 2 * max_value);
-}
-RasterPoint3d ConvertToRasterPoint(const geometry::Point3d& point, const RasterResolution& res) {
-    return RasterPoint3d{ConvertToRasterCoordinate(point.x(), res.x_max),
-                         ConvertToRasterCoordinate(point.y(), res.y_max),
-                         ConvertToRasterCoordinate(point.z(), res.z_max)};
-}
-
-geometry::Coordinate ConvertToCoordinate(RasterCoordinate coord, RasterCoordinate max_value) {
-    return static_cast<geometry::Coordinate>(coord) / max_value * 2 - 1;
-}
-geometry::Point3d ConvertToCoordinate(const RasterPoint3d& point, const RasterResolution& res) {
-    return geometry::Point3d{ConvertToCoordinate(point.x, res.x_max),
-                             ConvertToCoordinate(point.y, res.y_max),
-                             ConvertToCoordinate(point.z, res.z_max)};
-}
-
 // пока что примитивная растеризация
 void Renderer::RasterizeFace(Face face, Face global_face, const Texture& texture, ZBuffer& buffer,
                              Screen& screen) {
 
-    auto normis = NormalToFace(global_face);
-    // auto colli = Color::Random();
-
     std::vector<std::pair<Vertex, Vertex>> paired_vertexes = {
         {face.a, global_face.a}, {face.b, global_face.b}, {face.c, global_face.c}};
 
-    std::sort(paired_vertexes.begin(), paired_vertexes.end(), [](const std::pair<Vertex, Vertex>& a, const std::pair<Vertex, Vertex>& b) {
-        return a.first.point.y() < b.first.point.y();
-    });
+    std::sort(paired_vertexes.begin(), paired_vertexes.end(),
+              [](const std::pair<Vertex, Vertex>& a, const std::pair<Vertex, Vertex>& b) {
+                  return a.first.point.y() < b.first.point.y();
+              });
     face.a = paired_vertexes[0].first;
     face.b = paired_vertexes[1].first;
     face.c = paired_vertexes[2].first;
@@ -218,18 +149,48 @@ void Renderer::RasterizeFace(Face face, Face global_face, const Texture& texture
             }
 
             Vertex real_vertex = WeightedSum(alpha_vertex, beta_vertex, gamma);
-            ColoredVertex col_vertex = CreateColoredVertex(real_vertex, texture);
-            // col_vertex.col = colli;
-            col_vertex.normal = normis;
-            // ColoredVertex col_vertex = ColoredVertex{
+            PixelOriginInformation col_vertex{.point = real_vertex.point,
+                                              .normal = global_face.a.normal,
+                                              .col = texture.GetPixelColor(real_vertex.text_coord)};
+
+            // PixelOriginInformation col_vertex = PixelOriginInformation{
             //     .point = real_vertex.point, .normal = real_vertex.normal, .col = col_here};
 
             buffer.TryToAddVertex(
-                RasterPoint3d{x, y, ConvertToRasterCoordinate(col_vertex.point.z(), res.z_max)},
+                RasterPoint3d{x, y,
+                              detail::ConvertToRasterCoordinate(col_vertex.point.z(), res.z_max)},
                 col_vertex);
         }
     }
 }
+
+namespace detail {
+Vertex MoveFromLocalToGlobalCoordinates(const Vertex& local_vertex, const geometry::Pose& pose) {
+    return Vertex{.point = pose.rot_matrix * local_vertex.point + pose.pos_vector,
+                  .normal = pose.rot_matrix * local_vertex.normal,
+                  .text_coord = local_vertex.text_coord};
+}
+
+Vertex MoveFromGlobalToViewerCoordinates(const Vertex& global_vertex,
+                                         const geometry::Pose& viewer_pose) {
+    return Vertex{
+        .point = viewer_pose.rot_matrix.inverse() * (global_vertex.point - viewer_pose.pos_vector),
+        .normal = viewer_pose.rot_matrix.inverse() * global_vertex.normal,
+        .text_coord = global_vertex.text_coord};
+}
+
+Face MoveFromLocalToGlobalCoordinates(const Face& local_face, const geometry::Pose& pose) {
+    return Face{MoveFromLocalToGlobalCoordinates(local_face.a, pose),
+                MoveFromLocalToGlobalCoordinates(local_face.b, pose),
+                MoveFromLocalToGlobalCoordinates(local_face.c, pose)};
+}
+
+Face MoveFromGlobalToViewerCoordinates(const Face& global_face, const geometry::Pose& viewer_pose) {
+    return Face{MoveFromGlobalToViewerCoordinates(global_face.a, viewer_pose),
+                MoveFromGlobalToViewerCoordinates(global_face.b, viewer_pose),
+                MoveFromGlobalToViewerCoordinates(global_face.c, viewer_pose)};
+}
+}  // namespace detail
 
 }  // namespace kernel
 }  // namespace project
