@@ -54,6 +54,8 @@ struct Face {
     Vertex c;
 };
 
+geometry::Vector3d NormalToFace(const Face& face);
+
 class Mesh3d {
     friend Mesh3d ReadMeshFromFile(const std::string& filename);
 

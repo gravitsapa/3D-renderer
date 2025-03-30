@@ -24,9 +24,15 @@ void Application::LoadSceneWithCoffee() {
 
     world_.AddObject(
         plant,
-        geometry::Pose{geometry::Rotation::ByAngles(3.14, 0, 0), geometry::Position{geometry::Vector3d{0.5, 0.5, -0.8}}});
+        geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.5, 0), geometry::Position{geometry::Vector3d{0, 0.2, -0.8}}});
+
 
     world_.AddCamera(kernel::Camera{0.5, 2, 1, 1, 0.75, 0.75});
+
+    kernel::Lights lights;
+    lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
+    lights.AddDirectionalLight(kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25),kernel::Color::White()));
+    world_.AddLights(lights);
 }
 
 void Application::LoadSceneWithCube() {
@@ -37,6 +43,10 @@ void Application::LoadSceneWithCube() {
         geometry::Pose{geometry::Rotation::ByAngles(0, 0.75, 0.75), geometry::Position{geometry::Vector3d{0, 0, -200}}});
 
     world_.AddCamera(kernel::Camera{50, 500, 200, 200, 150, 150});
+    kernel::Lights lights;
+    lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
+    lights.AddDirectionalLight(kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25),kernel::Color::White()));
+    world_.AddLights(lights);
 }
 
 void Application::ShowScreen() {

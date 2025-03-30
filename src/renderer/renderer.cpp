@@ -1,5 +1,6 @@
 #include <renderer.h>
 #include <iostream>
+#include <algorithm>
 
 namespace project {
 namespace kernel {
@@ -18,6 +19,19 @@ bool ZBuffer::TryToAddVertex(const RasterPoint3d& raster_point, const ColoredVer
     return true;
 }
 
+Height ZBuffer::GetHeight() {
+    return Height(buffer_.GetHeight());
+}
+
+Width ZBuffer::GetWidth() {
+    return Width(buffer_.GetWidth());
+}
+
+std::optional<ColoredVertex>& ZBuffer::GetVertex(Height y, Width x) {
+    assert(0 <= y && y < buffer_.GetHeight() && 0 <= x && x < buffer_.GetWidth());
+    return buffer_.Get(y, x).vertex;
+}
+
 std::optional<ColoredVertex> ZBuffer::GetVertex(Height y, Width x) const {
     assert(0 <= y && y < buffer_.GetHeight() && 0 <= x && x < buffer_.GetWidth());
     return buffer_.Get(y, x).vertex;
@@ -25,7 +39,7 @@ std::optional<ColoredVertex> ZBuffer::GetVertex(Height y, Width x) const {
 
 Vertex MoveFromLocalToGlobalCoordinates(const Vertex& local_vertex, const geometry::Pose& pose) {
     return Vertex{.point = pose.rot_matrix * local_vertex.point + pose.pos_vector,
-                  .normal = local_vertex.normal,
+                  .normal = pose.rot_matrix * local_vertex.normal,
                   .text_coord = local_vertex.text_coord};
 }
 
@@ -33,7 +47,7 @@ Vertex MoveFromGlobalToViewerCoordinates(const Vertex& global_vertex,
                                          const geometry::Pose& viewer_pose) {
     return Vertex{
         .point = viewer_pose.rot_matrix.inverse() * (global_vertex.point - viewer_pose.pos_vector),
-        .normal = global_vertex.normal,
+        .normal = viewer_pose.rot_matrix.inverse() * global_vertex.normal,
         .text_coord = global_vertex.text_coord};
 }
 
@@ -52,21 +66,36 @@ Face MoveFromGlobalToViewerCoordinates(const Face& global_face, const geometry::
 Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
     ZBuffer buffer(screen.GetHeight(), screen.GetWidth(), raster_depth_max + 1);
+    screen.Fill(background_color);
 
     RasterizeWorld(world, buffer, screen, camera);
+    GetColorOfEachPixelByLights(world.GetLights(), buffer);
+    PrintAllPixelsFromBufferToScreen(buffer, screen);
 
+    return screen;
+}
+
+void Renderer::PrintAllPixelsFromBufferToScreen(const ZBuffer& buffer, Screen& screen) {
     for (int y = 0; y < screen.GetHeight(); ++y) {
         for (int x = 0; x < screen.GetWidth(); ++x) {
-            auto opt_vertex_from_buffer = buffer.GetVertex(Height(y), Width(x));
+            const auto& opt_vertex_from_buffer = buffer.GetVertex(Height(y), Width(x));
             if (opt_vertex_from_buffer.has_value()) {
                 screen.SetPixel(Height(y), Width(x), opt_vertex_from_buffer.value().col);
-            } else {
-                screen.SetPixel(Height(y), Width(x), background_color);
             }
         }
     }
+}
 
-    return screen;
+void Renderer::GetColorOfEachPixelByLights(const Lights& lights, ZBuffer& buffer) {
+    for (int y = 0; y < buffer.GetHeight(); ++y) {
+        for (int x = 0; x < buffer.GetWidth(); ++x) {
+            auto& opt_vertex_from_buffer = buffer.GetVertex(Height(y), Width(x));
+            if (opt_vertex_from_buffer.has_value()) {
+                opt_vertex_from_buffer.value().col = lights.GetColorOfPointByLight(
+                    opt_vertex_from_buffer.value().col, opt_vertex_from_buffer.value().normal);
+            }
+        }
+    }
 }
 
 void Renderer::RasterizeWorld(const World& world, ZBuffer& buffer, Screen& screen,
@@ -104,20 +133,7 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
         return;
     }
 
-    RasterizeFace(face_in_camera_space, texture, buffer, screen);
-}
-
-void SortVertexesByY(Vertex& a, Vertex& b) {
-    if (a.point.y() > b.point.y()) {
-        std::swap(a, b);
-    }
-}
-
-Face SortVertexesInFaceByY(Face face) {
-    SortVertexesByY(face.a, face.b);
-    SortVertexesByY(face.b, face.c);
-    SortVertexesByY(face.a, face.b);
-    return face;
+    RasterizeFace(face_in_camera_space, global_face, texture, buffer, screen);
 }
 
 RasterCoordinate ConvertToRasterCoordinate(geometry::Coordinate coord, RasterCoordinate max_value) {
@@ -139,14 +155,29 @@ geometry::Point3d ConvertToCoordinate(const RasterPoint3d& point, const RasterRe
 }
 
 // пока что примитивная растеризация
-void Renderer::RasterizeFace(const Face& face, const Texture& texture, ZBuffer& buffer,
+void Renderer::RasterizeFace(Face face, Face global_face, const Texture& texture, ZBuffer& buffer,
                              Screen& screen) {
-    Face sorted_face = SortVertexesInFaceByY(face);
+
+    auto normis = NormalToFace(global_face);
+    // auto colli = Color::Random();
+
+    std::vector<std::pair<Vertex, Vertex>> paired_vertexes = {
+        {face.a, global_face.a}, {face.b, global_face.b}, {face.c, global_face.c}};
+
+    std::sort(paired_vertexes.begin(), paired_vertexes.end(), [](const std::pair<Vertex, Vertex>& a, const std::pair<Vertex, Vertex>& b) {
+        return a.first.point.y() < b.first.point.y();
+    });
+    face.a = paired_vertexes[0].first;
+    face.b = paired_vertexes[1].first;
+    face.c = paired_vertexes[2].first;
+    global_face.a = paired_vertexes[0].second;
+    global_face.b = paired_vertexes[1].second;
+    global_face.c = paired_vertexes[2].second;
 
     RasterResolution res{screen.GetWidth() - 1, screen.GetHeight() - 1, raster_depth_max};
-    RasterPoint3d ra = ConvertToRasterPoint(sorted_face.a.point, res);
-    RasterPoint3d rb = ConvertToRasterPoint(sorted_face.b.point, res);
-    RasterPoint3d rc = ConvertToRasterPoint(sorted_face.c.point, res);
+    RasterPoint3d ra = ConvertToRasterPoint(face.a.point, res);
+    RasterPoint3d rb = ConvertToRasterPoint(face.b.point, res);
+    RasterPoint3d rc = ConvertToRasterPoint(face.c.point, res);
 
     if (ra.y == rc.y) {
         return;
@@ -163,15 +194,15 @@ void Renderer::RasterizeFace(const Face& face, const Texture& texture, ZBuffer& 
         Factor beta = (Factor)(second_seg ? h - rb.y + ra.y : h) / seg_height;
 
         RasterCoordinate alpha_x = ra.x + (rc.x - ra.x) * alpha;
-        Vertex alpha_vertex = WeightedSum(sorted_face.a, sorted_face.c, alpha);
+        Vertex alpha_vertex = WeightedSum(face.a, face.c, alpha);
         RasterCoordinate beta_x;
         Vertex beta_vertex;
         if (second_seg) {
             beta_x = rb.x + (rc.x - rb.x) * beta;
-            beta_vertex = WeightedSum(sorted_face.b, sorted_face.c, beta);
+            beta_vertex = WeightedSum(face.b, face.c, beta);
         } else {
             beta_x = ra.x + (rb.x - ra.x) * beta;
-            beta_vertex = WeightedSum(sorted_face.a, sorted_face.b, beta);
+            beta_vertex = WeightedSum(face.a, face.b, beta);
         }
 
         if (alpha_x > beta_x) {
@@ -188,6 +219,8 @@ void Renderer::RasterizeFace(const Face& face, const Texture& texture, ZBuffer& 
 
             Vertex real_vertex = WeightedSum(alpha_vertex, beta_vertex, gamma);
             ColoredVertex col_vertex = CreateColoredVertex(real_vertex, texture);
+            // col_vertex.col = colli;
+            col_vertex.normal = normis;
             // ColoredVertex col_vertex = ColoredVertex{
             //     .point = real_vertex.point, .normal = real_vertex.normal, .col = col_here};
 

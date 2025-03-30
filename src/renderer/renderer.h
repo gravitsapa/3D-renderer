@@ -35,9 +35,6 @@ Face MoveFromLocalToGlobalCoordinates(const Face& local_face, const geometry::Po
 
 Face MoveFromGlobalToViewerCoordinates(const Face& global_face, const geometry::Pose& viewer_pose);
 
-void SortVertexesByY(Vertex& a, Vertex& b);
-Face SortVertexesInFaceByY(Face face);
-
 struct RasterResolution {
     RasterCoordinate x_max;
     RasterCoordinate y_max;
@@ -55,8 +52,11 @@ public:
     ZBuffer(Height height, Width width, RasterCoordinate depth);
 
     bool TryToAddVertex(const RasterPoint3d& raster_point, const ColoredVertex& vertex);
+    std::optional<ColoredVertex>& GetVertex(Height y, Width x);
     std::optional<ColoredVertex> GetVertex(Height y, Width x) const;
 
+    Height GetHeight();
+    Width GetWidth();
 private:
     structures::Table<BufferPoint> buffer_;
 };
@@ -73,7 +73,10 @@ private:
                          const PosedCamera& camera);
     void RasterizeGlobalVertex(const Face& face, const Texture& texture, const geometry::Pose& pose,
                                ZBuffer& buffer, Screen& screen, const PosedCamera& camera);
-    void RasterizeFace(const Face& face, const Texture& texture, ZBuffer& buffer, Screen& screen);
+    void RasterizeFace(Face face, Face global_face, const Texture& texture, ZBuffer& buffer, Screen& screen);
+
+    void GetColorOfEachPixelByLights(const Lights& lights, ZBuffer& buffer);
+    void PrintAllPixelsFromBufferToScreen(const ZBuffer& buffer, Screen& screen);
 };
 
 }  // namespace kernel

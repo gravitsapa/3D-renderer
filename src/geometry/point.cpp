@@ -5,6 +5,10 @@
 namespace project {
 namespace geometry {
 
+Vector3d Normalized(const Vector3d& vector) {
+    return vector / vector.norm();
+}
+
 HomogeneousPoint3d ConvertToHomogeneousPoint(const Point3d& point) {
     return HomogeneousPoint3d{point.x(), point.y(), point.z(), 1};
 }

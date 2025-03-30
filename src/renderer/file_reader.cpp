@@ -172,7 +172,7 @@ Texture ReadTextureFromFile(const std::string& filename) {
         for (int j = 0; j < image.cols; ++j) {
             cv::Vec3b bgr_pixel = image.at<cv::Vec3b>(i, j);
             texture.data_.Get(i, j) =
-                Color{.r = bgr_pixel.val[2], .g = bgr_pixel.val[1], .b = bgr_pixel.val[0]};
+                ColorByChar(bgr_pixel.val[2], bgr_pixel.val[1], bgr_pixel.val[0]);
         }
     }
 

@@ -15,13 +15,17 @@ Vertex WeightedSum(const Vertex& a, const Vertex& b, Factor alpha) {
                                          a.text_coord.w * (1 - alpha) + b.text_coord.w * alpha}};
 }
 
+geometry::Vector3d NormalToFace(const Face& face) {
+    return (face.b.point - face.a.point).cross(face.c.point - face.a.point);
+}
+
 ColoredVertex CreateColoredVertex(const Vertex& vertex, const Texture& texture) {
     return ColoredVertex{.point = vertex.point,
                          .normal = vertex.normal,
                          .col = texture.GetPixelColor(vertex.text_coord)};
 }
 
-Texture::Texture() : data_(1, 1, Color::Random()) {
+Texture::Texture() : data_(1, 1, Color::Red()) {
 }
 
 int Texture::ConvertToIndexH(TextureCoordinate h) const {
