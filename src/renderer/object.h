@@ -25,7 +25,6 @@ public:
     Color GetPixelColor(TextureCoordinates coord) const;
 
 private:
-    TextureCoordinate MoveTo01Segment(TextureCoordinate x) const;
     int ConvertToIndexH(TextureCoordinate h) const;
     int ConvertToIndexW(TextureCoordinate w) const;
 

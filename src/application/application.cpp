@@ -24,7 +24,7 @@ void Application::LoadSceneWithCoffee() {
 
     world_.AddObject(
         plant,
-        geometry::Pose{geometry::Rotation::ByAngles(3.14, 0, 0), geometry::Position{geometry::Vector3d{0, 0.5, -1}}});
+        geometry::Pose{geometry::Rotation::ByAngles(3.14, 0, 0), geometry::Position{geometry::Vector3d{0.5, 0.5, -0.8}}});
 
     world_.AddCamera(kernel::Camera{0.5, 2, 1, 1, 0.75, 0.75});
 }

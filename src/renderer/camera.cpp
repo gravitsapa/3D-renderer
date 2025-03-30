@@ -41,9 +41,5 @@ Face Camera::ProjectFaceOnMe(const Face& face) const {
     return Face{ProjectVertexOnMe(face.a), ProjectVertexOnMe(face.b), ProjectVertexOnMe(face.c)};
 }
 
-geometry::Coordinate Camera::GetDepth() const {
-    return far_plane_ - near_plane_;
-}
-
 }  // namespace kernel
 }  // namespace project

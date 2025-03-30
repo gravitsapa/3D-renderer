@@ -21,21 +21,16 @@ ColoredVertex CreateColoredVertex(const Vertex& vertex, const Texture& texture) 
                          .col = texture.GetPixelColor(vertex.text_coord)};
 }
 
-TextureCoordinate Texture::MoveTo01Segment(TextureCoordinate x) const {
-    assert(0 <= x && x <= 1);
-    return x;
-}
-
 Texture::Texture() : data_(1, 1, Color::Random()) {
 }
 
 int Texture::ConvertToIndexH(TextureCoordinate h) const {
-    h = MoveTo01Segment(h);
+    assert(0 <= h && h <= 1);
     return static_cast<int>(h * (data_.GetHeight() - 1));
 }
 
 int Texture::ConvertToIndexW(TextureCoordinate w) const {
-    w = MoveTo01Segment(w);
+    assert(0 <= w && w <= 1);
     return static_cast<int>(w * (data_.GetWidth() - 1));
 }
 

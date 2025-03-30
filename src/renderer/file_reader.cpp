@@ -160,7 +160,6 @@ Mesh3d ReadMeshFromFile(const std::string& filename) {
     return Mesh3d(faces);
 }
 
-// пока что возвращаем дефолтную
 Texture ReadTextureFromFile(const std::string& filename) {
     auto image = cv::imread(filename, cv::IMREAD_COLOR);
     if (image.empty()) {

@@ -55,7 +55,7 @@ public:
     ZBuffer(Height height, Width width, RasterCoordinate depth);
 
     bool TryToAddVertex(const RasterPoint3d& raster_point, const ColoredVertex& vertex);
-    std::optional<ColoredVertex> GetVertex(RasterCoordinate y, RasterCoordinate x) const;
+    std::optional<ColoredVertex> GetVertex(Height y, Width x) const;
 
 private:
     structures::Table<BufferPoint> buffer_;

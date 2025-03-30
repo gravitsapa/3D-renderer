@@ -11,12 +11,7 @@ HomogeneousPoint3d ConvertToHomogeneousPoint(const Point3d& point) {
 
 Point3d ConvertToPoint(const HomogeneousPoint3d& point) {
     Coordinate w = point(3, 0);
-    // assert(w != 0 && "W coordinate must not be zero");
-    if (w == 0) {
-        std::cerr << "WTF: " << point.x() << ' ' << point.y() << ' ' << point.z() << ' ' << w
-                  << std::endl;
-        return Point3d{0, 0, 0};
-    }
+    assert(w != 0 && "W coordinate must not be zero");
     return Point3d{point.x() / w, point.y() / w, point.z() / w};
 }
 

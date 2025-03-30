@@ -11,8 +11,6 @@ public:
            geometry::Coordinate left_side, geometry::Coordinate right_side,
            geometry::Coordinate top_side, geometry::Coordinate bottom_side);
 
-    geometry::Coordinate GetDepth() const;
-
     Vertex ProjectVertexOnMe(const Vertex& vertex) const;
     Face ProjectFaceOnMe(const Face& face) const;
 

@@ -9,22 +9,16 @@ ZBuffer::ZBuffer(Height height, Width width, RasterCoordinate depth)
 }
 
 bool ZBuffer::TryToAddVertex(const RasterPoint3d& raster_point, const ColoredVertex& vertex) {
-    // std::cerr << "RastPoint " << raster_point.x << ',' << raster_point.y << ',' << raster_point.z
-    //           << " with color " << (int)vertex.col.r << ',' << (int)vertex.col.g << ','
-    //           << (int)vertex.col.b;
     auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
     if (buf_point.depth <= raster_point.z) {
-        // std::cerr << " SKIP" << std::endl;
         return false;
     }
-
-    // std::cerr << " OK" << std::endl;
 
     buf_point = BufferPoint{raster_point.z, vertex};
     return true;
 }
 
-std::optional<ColoredVertex> ZBuffer::GetVertex(RasterCoordinate y, RasterCoordinate x) const {
+std::optional<ColoredVertex> ZBuffer::GetVertex(Height y, Width x) const {
     assert(0 <= y && y < buffer_.GetHeight() && 0 <= x && x < buffer_.GetWidth());
     return buffer_.Get(y, x).vertex;
 }
@@ -63,7 +57,7 @@ Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&&
 
     for (int y = 0; y < screen.GetHeight(); ++y) {
         for (int x = 0; x < screen.GetWidth(); ++x) {
-            auto opt_vertex_from_buffer = buffer.GetVertex(y, x);
+            auto opt_vertex_from_buffer = buffer.GetVertex(Height(y), Width(x));
             if (opt_vertex_from_buffer.has_value()) {
                 screen.SetPixel(Height(y), Width(x), opt_vertex_from_buffer.value().col);
             } else {
@@ -158,7 +152,7 @@ void Renderer::RasterizeFace(const Face& face, const Texture& texture, ZBuffer& 
         return;
     }
 
-    Color col_here = Color::Random();
+    // Color col_here = Color::Random();
 
     RasterCoordinate height = rc.y - ra.y;
     for (RasterCoordinate h = 0; h < height; ++h) {
