@@ -13,7 +13,7 @@ Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&&
     screen.Fill(background_color);
 
     RasterizeWorld(world, buffer, screen, camera);
-    GetColorOfEachPixelByLights(world.GetLights(), buffer);
+    GetColorOfEachPixelByLights(world.GetLights(), buffer, camera);
     PrintAllPixelsFromBufferToScreen(buffer, screen);
 
     return screen;
@@ -30,13 +30,15 @@ void Renderer::PrintAllPixelsFromBufferToScreen(const ZBuffer& buffer, Screen& s
     }
 }
 
-void Renderer::GetColorOfEachPixelByLights(const Lights& lights, ZBuffer& buffer) {
+void Renderer::GetColorOfEachPixelByLights(const Lights& lights, ZBuffer& buffer,
+                                           const PosedCamera& camera) {
     for (int y = 0; y < buffer.GetHeight(); ++y) {
         for (int x = 0; x < buffer.GetWidth(); ++x) {
             auto& opt_vertex_from_buffer = buffer.GetVertex(Height(y), Width(x));
             if (opt_vertex_from_buffer.has_value()) {
                 opt_vertex_from_buffer.value().col = lights.GetColorOfPointByLight(
-                    opt_vertex_from_buffer.value().col, opt_vertex_from_buffer.value().normal);
+                    opt_vertex_from_buffer.value().col, opt_vertex_from_buffer.value().normal,
+                    camera.pos_vector - opt_vertex_from_buffer.value().point);
             }
         }
     }

@@ -12,7 +12,7 @@ public:
     AmbientLight();
     AmbientLight(Color col);
 
-    Color GetColorOfPointByLight(Color tex_color) const;
+    Color GetColorOfPointByLight(const Color& tex_color) const;
 
 private:
     Color light_color_;
@@ -20,15 +20,18 @@ private:
 
 class DirectionalLight {
 public:
+    using Factor = double;
     DirectionalLight() = default;
     DirectionalLight(geometry::Vector3d direction);
     DirectionalLight(geometry::Vector3d direction_, Color col);
 
-    Color GetColorOfPointByLight(Color tex_color, geometry::Vector3d normal) const;
+    Color GetColorOfPointByLight(const Color& tex_color, const geometry::Vector3d& normal,
+                                 const geometry::Vector3d& vector_to_viewer) const;
 
 private:
     Color light_color_;
     geometry::Vector3d direction_;
+    constexpr static Factor specular_exponent = 50;
 };
 
 class Lights {
@@ -36,7 +39,8 @@ public:
     void AddAmbientLight(const AmbientLight& ambient_light);
     void AddDirectionalLight(const DirectionalLight& directional_light);
 
-    Color GetColorOfPointByLight(Color tex_color, geometry::Vector3d normal) const;
+    Color GetColorOfPointByLight(const Color& tex_color, const geometry::Vector3d& normal,
+                                 const geometry::Vector3d& vector_to_viewer) const;
     void Merge(const Lights& another_lights);
 
 private:
