@@ -25,6 +25,7 @@ public:
     ZBuffer(Height height, Width width, RasterCoordinate depth);
 
     bool TryToAddVertex(const RasterPoint3d& raster_point, const PixelOriginInformation& vertex);
+    bool CanToAddVertex(const RasterPoint3d& raster_point);
     std::optional<PixelOriginInformation>& GetVertex(Height y, Width x);
     std::optional<PixelOriginInformation> GetVertex(Height y, Width x) const;
 

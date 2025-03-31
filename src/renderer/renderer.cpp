@@ -1,18 +1,11 @@
 #include <renderer.h>
 #include <iostream>
 #include <algorithm>
+#include <rasterizer.h>
+#include <interpolator.h>
 
 namespace project {
 namespace kernel {
-
-// нужно дописать алгоритм для нормали
-Vertex WeightedSum(const Vertex& a, const Vertex& b, Factor alpha) {
-    return Vertex{
-        .point = (a.point * (1 - alpha) + b.point * alpha),
-        .normal = a.normal,
-        .text_coord = TextureCoordinates{a.text_coord.h * (1 - alpha) + b.text_coord.h * alpha,
-                                         a.text_coord.w * (1 - alpha) + b.text_coord.w * alpha}};
-}
 
 Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
@@ -84,83 +77,53 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
         return;
     }
 
-    RasterizeFace(face_in_camera_space, global_face, texture, buffer, screen);
-}
+    RasterResolution resolution{screen.GetWidth() - 1, screen.GetHeight() - 1};
+    RasterizedFigure pixel_triangle = RasterizeTriangleByXY(face_in_camera_space, resolution);
 
-// пока что примитивная растеризация
-void Renderer::RasterizeFace(Face face, Face global_face, const Texture& texture, ZBuffer& buffer,
-                             Screen& screen) {
+    Color color_by_texture = Color::Random();
+    geometry::Point2d point_a_in_2d = geometry::TruncZ(face_in_camera_space.a.point);
+    geometry::Point2d point_b_in_2d = geometry::TruncZ(face_in_camera_space.b.point);
+    geometry::Point2d point_c_in_2d = geometry::TruncZ(face_in_camera_space.c.point);
+    WeightsFinder weights_finder(point_a_in_2d, point_b_in_2d, point_c_in_2d);
 
-    std::vector<std::pair<Vertex, Vertex>> paired_vertexes = {
-        {face.a, global_face.a}, {face.b, global_face.b}, {face.c, global_face.c}};
+    for (auto pixel : pixel_triangle.GetAllPoints()) {
+        geometry::Point2d pixel_in_camera_space = ConvertToCoordinate(pixel, resolution);
 
-    std::sort(paired_vertexes.begin(), paired_vertexes.end(),
-              [](const std::pair<Vertex, Vertex>& a, const std::pair<Vertex, Vertex>& b) {
-                  return a.first.point.y() < b.first.point.y();
-              });
-    face.a = paired_vertexes[0].first;
-    face.b = paired_vertexes[1].first;
-    face.c = paired_vertexes[2].first;
-    global_face.a = paired_vertexes[0].second;
-    global_face.b = paired_vertexes[1].second;
-    global_face.c = paired_vertexes[2].second;
+        VertexWeights weights = weights_finder.FindBarycentricCoordinates(pixel_in_camera_space);
 
-    RasterResolution res{screen.GetWidth() - 1, screen.GetHeight() - 1, raster_depth_max};
-    RasterPoint3d ra = ConvertToRasterPoint(face.a.point, res);
-    RasterPoint3d rb = ConvertToRasterPoint(face.b.point, res);
-    RasterPoint3d rc = ConvertToRasterPoint(face.c.point, res);
+        // std::cerr << "WEIGHTS " << weights.a << ' ' << weights.b << ' ' << weights.c <<
+        // std::endl;
 
-    if (ra.y == rc.y) {
-        return;
-    }
+        RasterCoordinate z_coordinate_in_buffer = detail::ConvertToRasterCoordinate(
+            InterpolateCoordinate(weights, face_in_camera_space.a.point.z(),
+                                  face_in_camera_space.b.point.z(),
+                                  face_in_camera_space.c.point.z()),
+            raster_depth_max);
 
-    // Color col_here = Color::Random();
-
-    RasterCoordinate height = rc.y - ra.y;
-    for (RasterCoordinate h = 0; h < height; ++h) {
-        bool second_seg = h > rb.y - ra.y || rb.y == ra.y;
-        RasterCoordinate seg_height = second_seg ? rc.y - rb.y : rb.y - ra.y;
-
-        Factor alpha = (Factor)(h) / height;
-        Factor beta = (Factor)(second_seg ? h - rb.y + ra.y : h) / seg_height;
-
-        RasterCoordinate alpha_x = ra.x + (rc.x - ra.x) * alpha;
-        Vertex alpha_vertex = WeightedSum(face.a, face.c, alpha);
-        RasterCoordinate beta_x;
-        Vertex beta_vertex;
-        if (second_seg) {
-            beta_x = rb.x + (rc.x - rb.x) * beta;
-            beta_vertex = WeightedSum(face.b, face.c, beta);
-        } else {
-            beta_x = ra.x + (rb.x - ra.x) * beta;
-            beta_vertex = WeightedSum(face.a, face.b, beta);
+        RasterPoint3d raster_point{.x = pixel.x, .y = pixel.y, .z = z_coordinate_in_buffer};
+        if (!buffer.CanToAddVertex(raster_point)) {
+            continue;
         }
 
-        if (alpha_x > beta_x) {
-            std::swap(alpha_x, beta_x);
-            std::swap(alpha_vertex, beta_vertex);
-        }
+        geometry::Vector3d interpolated_normal = InterpolateNormals(
+            weights, global_face.a.normal, global_face.b.normal, global_face.c.normal);
 
-        RasterCoordinate y = ra.y + h;
-        for (RasterCoordinate x = alpha_x; x <= beta_x; x++) {
-            Factor gamma = 0;
-            if (beta_x > alpha_x) {
-                gamma = (Factor)(x - alpha_x) / (beta_x - alpha_x);
-            }
+        geometry::Point3d interpolated_point = InterpolatePoints(
+            weights, global_face.a.point, global_face.b.point, global_face.c.point);
 
-            Vertex real_vertex = WeightedSum(alpha_vertex, beta_vertex, gamma);
-            PixelOriginInformation col_vertex{.point = real_vertex.point,
-                                              .normal = global_face.a.normal,
-                                              .col = texture.GetPixelColor(real_vertex.text_coord)};
+        TextureCoordinates interpolated_texture_coordinates = InterpolateTextureCoordinates(
+            weights, global_face.a.text_coord, global_face.b.text_coord, global_face.c.text_coord);
 
-            // PixelOriginInformation col_vertex = PixelOriginInformation{
-            //     .point = real_vertex.point, .normal = real_vertex.normal, .col = col_here};
+        interpolated_texture_coordinates.h =
+            std::max(0.0, std::min(1.0, interpolated_texture_coordinates.h));
+        interpolated_texture_coordinates.w =
+            std::max(0.0, std::min(1.0, interpolated_texture_coordinates.w));
 
-            buffer.TryToAddVertex(
-                RasterPoint3d{x, y,
-                              detail::ConvertToRasterCoordinate(col_vertex.point.z(), res.z_max)},
-                col_vertex);
-        }
+        Color color_by_texture = texture.GetPixelColor(interpolated_texture_coordinates);
+
+        buffer.TryToAddVertex(raster_point, PixelOriginInformation{.point = interpolated_point,
+                                                                   .normal = interpolated_normal,
+                                                                   .col = color_by_texture});
     }
 }
 

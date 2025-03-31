@@ -24,6 +24,8 @@ add_executable(3D-renderer
     src/renderer/file_reader.cpp
     src/renderer/zbuffer.cpp
     src/renderer/raster_coordinates.cpp
+    src/renderer/rasterizer.cpp
+    src/renderer/interpolator.cpp
     src/application/application.cpp
     src/application/except.cpp 
     src/application/main.cpp 

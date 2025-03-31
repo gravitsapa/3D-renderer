@@ -7,6 +7,11 @@ ZBuffer::ZBuffer(Height height, Width width, RasterCoordinate depth)
     : buffer_(height, width, BufferPoint{depth, std::nullopt}) {
 }
 
+bool ZBuffer::CanToAddVertex(const RasterPoint3d& raster_point) {
+    auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
+    return buf_point.depth > raster_point.z;
+}
+
 bool ZBuffer::TryToAddVertex(const RasterPoint3d& raster_point,
                              const PixelOriginInformation& vertex) {
     auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);

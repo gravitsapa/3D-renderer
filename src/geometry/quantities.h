@@ -6,6 +6,8 @@ namespace project {
 namespace geometry {
 
 using Coordinate = double;
+using Vector2d = Eigen::Vector2<Coordinate>;
+using Matrix2d = Eigen::Matrix<Coordinate, 2, 2>;
 using Vector3d = Eigen::Vector3<Coordinate>;
 using Matrix3d = Eigen::Matrix<Coordinate, 3, 3>;
 using Vector4d = Eigen::Vector4<Coordinate>;

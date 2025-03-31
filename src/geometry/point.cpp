@@ -19,5 +19,9 @@ Point3d ConvertToPoint(const HomogeneousPoint3d& point) {
     return Point3d{point.x() / w, point.y() / w, point.z() / w};
 }
 
+Point2d TruncZ(const Point3d& point) {
+    return Point2d(point.x(), point.y());
+}
+
 }  // namespace geometry
 }  // namespace project

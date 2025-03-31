@@ -6,6 +6,11 @@ namespace kernel {
 
 using RasterCoordinate = long long;
 
+struct RasterPoint2d {
+    RasterCoordinate x;
+    RasterCoordinate y;
+};
+
 struct RasterPoint3d {
     RasterCoordinate x;
     RasterCoordinate y;
@@ -15,11 +20,10 @@ struct RasterPoint3d {
 struct RasterResolution {
     RasterCoordinate x_max;
     RasterCoordinate y_max;
-    RasterCoordinate z_max;
 };
 
-RasterPoint3d ConvertToRasterPoint(const geometry::Point3d& point, const RasterResolution& res);
-geometry::Point3d ConvertToCoordinate(const RasterPoint3d& point, const RasterResolution& res);
+RasterPoint2d ConvertToRasterPoint(const geometry::Point2d& point, const RasterResolution& res);
+geometry::Point2d ConvertToCoordinate(const RasterPoint2d& point, const RasterResolution& res);
 
 namespace detail {
 

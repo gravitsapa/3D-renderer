@@ -16,9 +16,6 @@ namespace kernel {
 
 constexpr RasterCoordinate raster_depth_max = 1'000'000'000'000;
 
-using Factor = double;
-Vertex WeightedSum(const Vertex& a, const Vertex& b, Factor alpha);
-
 class Renderer {
 public:
     Screen Project(const World& world, const PosedCamera& camera, Screen&& screen,
@@ -31,8 +28,6 @@ private:
                          const PosedCamera& camera);
     void RasterizeGlobalVertex(const Face& face, const Texture& texture, const geometry::Pose& pose,
                                ZBuffer& buffer, Screen& screen, const PosedCamera& camera);
-    void RasterizeFace(Face face, Face global_face, const Texture& texture, ZBuffer& buffer,
-                       Screen& screen);
 
     void GetColorOfEachPixelByLights(const Lights& lights, ZBuffer& buffer);
     void PrintAllPixelsFromBufferToScreen(const ZBuffer& buffer, Screen& screen);
