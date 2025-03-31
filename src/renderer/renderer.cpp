@@ -88,6 +88,10 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
     geometry::Point2d point_c_in_2d = geometry::TruncZ(face_in_camera_space.c.point);
     WeightsFinder weights_finder(point_a_in_2d, point_b_in_2d, point_c_in_2d);
 
+    // if (weights_finder.IsDegenerate()) {
+    //     return;
+    // }
+
     for (auto& segment : pixel_triangle.GetAllSegments()) {
         for (RasterCoordinate x = segment.left_x; x <= segment.right_x; ++x) {
             RasterPoint2d pixel = {x, segment.y};

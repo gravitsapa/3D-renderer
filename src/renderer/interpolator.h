@@ -19,8 +19,11 @@ public:
                   const geometry::Point2d& c);
 
     VertexWeights FindBarycentricCoordinates(const geometry::Point2d& p);
+    bool IsDegenerate();
 
 private:
+    static constexpr geometry::Coordinate epsilon_ = 1e-5;
+    bool degenerate_ = false;
     geometry::Matrix2d ab_ac_matrix_inv_;
     geometry::Point2d a_;
 };

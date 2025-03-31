@@ -7,13 +7,21 @@ namespace kernel {
 WeightsFinder::WeightsFinder(const geometry::Point2d& a, const geometry::Point2d& b,
                              const geometry::Point2d& c)
     : a_(a) {
+    if (std::abs((b - a).cross(c - a)) < epsilon_) {
+        degenerate_ = true;
+    }
     geometry::Matrix2d ab_ac_matrix;
     ab_ac_matrix.col(0) = b - a;
     ab_ac_matrix.col(1) = c - a;
     ab_ac_matrix_inv_ = ab_ac_matrix.inverse();
 }
 
+bool WeightsFinder::IsDegenerate() {
+    return degenerate_;
+}
+
 VertexWeights WeightsFinder::FindBarycentricCoordinates(const geometry::Point2d& p) {
+    // if (degenerate_) return {1, 0, 0};
     geometry::Vector2d solution = ab_ac_matrix_inv_ * (p - a_);
     return VertexWeights{.a = 1 - solution.x() - solution.y(), solution.x(), solution.y()};
 }
