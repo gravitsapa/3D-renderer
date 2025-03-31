@@ -17,68 +17,69 @@ VertexForRasterizer PrepareForRasterization(const geometry::Point3d projected_po
 
 std::vector<VertexForRasterizer> RasterizeTriangleByXY(VertexForRasterizer a, VertexForRasterizer b,
                                                        VertexForRasterizer c) {
-    detail::SortVerticesByY(a, b, c);
-
-    auto line1 = detail::BrezAlgo(a, c).GetAllSegments();
-    auto line2 = detail::BrezAlgo(a, b).GetAllSegments();
-    auto line3 = detail::BrezAlgo(b, c).GetAllSegments();
-
-    int i1 = 0;
-    int i2 = 0;
-    int i3 = 0;
 
     std::vector<VertexForRasterizer> rasterized;
-    for (int y = a.y; y <= c.y; ++y) {
-        if (line1[i1].y < y) {
-            i1++;
-            assert(line1[i1].y == y);
-        }
-        if (line2[i2].y < y && i2 + 1 < line2.size()) {
-            ++i2;
-        }
-        if (line3[i3].y < y) {
-            i3++;
-            assert(line3[i3].y == y);
+    detail::SortVerticesByY(a, b, c);
+
+    if (a.y == c.y) {
+        return {};
+    }
+
+    // Color col_here = Color::Random();
+
+    RasterCoordinate height = c.y - a.y;
+    for (RasterCoordinate h = 0; h < height; ++h) {
+        bool second_seg = h > b.y - a.y || b.y == a.y;
+        RasterCoordinate seg_height = second_seg ? c.y - b.y : b.y - a.y;
+
+        Factor alpha = (Factor)(h) / height;
+        Factor beta = (Factor)(second_seg ? h - b.y + a.y : h) / seg_height;
+
+        RasterCoordinate alpha_x = a.x + (c.x - a.x) * alpha;
+        RasterCoordinate beta_x;
+        if (second_seg) {
+            beta_x = b.x + (c.x - b.x) * beta;
+        } else {
+            beta_x = a.x + (b.x - a.x) * beta;
         }
 
-        detail::HorizontalSegment segment = line1[i1];
-        if (line2[i2].y == y) {
-            segment = detail::Merge(segment, line2[i2]);
-        }
-        if (line3[i3].y == y) {
-            segment = detail::Merge(segment, line3[i3]);
-        }
+        if (alpha_x <= beta_x) {
+            RasterCoordinate y = a.y + h;
+            for (RasterCoordinate x = alpha_x; x <= beta_x; x++) {
+                Factor gamma = 0;
+                if (beta_x > alpha_x) {
+                    gamma = (Factor)(x - alpha_x) / (beta_x - alpha_x);
+                }
 
-        Factor alpha = detail::GetFactorByPointInSegment(y, a.y, c.y);
-        Factor beta;
-        if (y <= b.y) {
-            beta = detail::GetFactorByPointInSegment(y, a.y, b.y);
-            for (RasterCoordinate x = segment.left_x; x <= segment.right_x; ++x) {
-                Factor gamma =
-                    detail::GetFactorByPointInSegment(x, segment.left_x, segment.right_x);
-                if (c.x > b.x)
-                    gamma = 1 - gamma;
-                VertexWeights weights{(1 - alpha) * (1 - gamma) + (1 - beta) * gamma, beta * gamma,
-                                      alpha * (1 - gamma)};
-                // std::cerr << alpha << ' ' << beta << ' ' << gamma << " ??? " << weights.a << ' '
-                //           << weights.b << ' ' << weights.c << std::endl;
-                // VertexWeights weights = {1, 0, 0};
+                VertexWeights weights;
+                if (second_seg) {
+                    weights = {(1 - alpha) * (1 - gamma), (1 - beta) * gamma,
+                               alpha * (1 - gamma) + beta * gamma};
+                } else {
+                    weights = {(1 - alpha) * (1 - gamma) + (1 - beta) * gamma, beta * gamma,
+                               alpha * (1 - gamma)};
+                }
 
                 rasterized.push_back(VertexForRasterizer{RasterPoint2d{x, y},
                                                          GetWeightedInformation(weights, a, b, c)});
             }
         } else {
-            beta = detail::GetFactorByPointInSegment(y, b.y, c.y);
-            for (RasterCoordinate x = segment.left_x; x <= segment.right_x; ++x) {
-                Factor gamma =
-                    detail::GetFactorByPointInSegment(x, segment.left_x, segment.right_x);
-                if (c.x > b.x)
-                    gamma = (1 - gamma);
-                VertexWeights weights{(1 - alpha) * (1 - gamma), (1 - beta) * gamma,
-                                      alpha * (1 - gamma) + beta * gamma};
-                // std::cerr << alpha << ' ' << beta << ' ' << gamma << " !!! " << weights.a << ' '
-                //           << weights.b << ' ' << weights.c << std::endl;
-                // VertexWeights weights = {1, 0, 0};
+            RasterCoordinate y = a.y + h;
+            for (RasterCoordinate x = beta_x; x <= alpha_x; x++) {
+                Factor gamma = 0;
+                if (alpha_x > beta_x) {
+                    gamma = (Factor)(x - beta_x) / (alpha_x - beta_x);
+                }
+
+                VertexWeights weights;
+                if (second_seg) {
+                    weights = {(1 - alpha) * gamma, (1 - beta) * (1 - gamma),
+                               alpha * gamma + beta * (1 - gamma)};
+                } else {
+                    weights = {(1 - beta) * (1 - gamma) + (1 - alpha) * gamma, beta * (1 - gamma),
+                               alpha * gamma};
+                }
+
                 rasterized.push_back(VertexForRasterizer{RasterPoint2d{x, y},
                                                          GetWeightedInformation(weights, a, b, c)});
             }
