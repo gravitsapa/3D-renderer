@@ -7,19 +7,30 @@
 namespace project {
 namespace kernel {
 
-class RasterizedFigure {
-public:
-    void AddRasterPoint(const RasterPoint2d& point);
-
-    const std::vector<RasterPoint2d>& GetAllPoints() const;
-
-private:
-    std::vector<RasterPoint2d> data_;
+struct HorizontalSegment {
+    RasterCoordinate y;
+    RasterCoordinate left_x, right_x;
 };
 
+class RasterizedFigure {
+public:
+    void AddRasterSegment(const HorizontalSegment& point);
+
+    const std::vector<HorizontalSegment>& GetAllSegments() const;
+
+    void Merge(const RasterizedFigure& another_figure);
+
+private:
+    std::vector<HorizontalSegment> data_;
+};
+
+RasterizedFigure BrezAlgo(RasterPoint2d a, RasterPoint2d b);
 RasterizedFigure RasterizeTriangleByXY(const Face& face, const RasterResolution& resolution);
 
 namespace detail {
+
+HorizontalSegment Merge(const HorizontalSegment& segment1, const HorizontalSegment& segment2);
+
 void SortPointsByY(RasterPoint2d& a, RasterPoint2d& b, RasterPoint2d& c);
 void SortPointsByY(RasterPoint2d& a, RasterPoint2d& b);
 
