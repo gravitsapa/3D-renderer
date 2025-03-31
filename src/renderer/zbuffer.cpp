@@ -1,25 +1,22 @@
 #include <zbuffer.h>
+#include <limits>
 
 namespace project {
 namespace kernel {
 
-ZBuffer::ZBuffer(Height height, Width width, RasterCoordinate depth)
-    : buffer_(height, width, BufferPoint{depth, std::nullopt}) {
+ZBuffer::ZBuffer(Height height, Width width)
+    : buffer_(height, width, BufferPoint{std::numeric_limits<geometry::Coordinate>::infinity(), std::nullopt}) {
 }
 
-bool ZBuffer::CanToAddVertex(const RasterPoint3d& raster_point) {
-    auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
-    return buf_point.depth > raster_point.z;
-}
-
-bool ZBuffer::TryToAddVertex(const RasterPoint3d& raster_point,
+bool ZBuffer::TryToAddVertex(const RasterPoint2d& raster_point,
+                             const geometry::Coordinate& z_coord,
                              const PixelOriginInformation& vertex) {
     auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
-    if (buf_point.depth <= raster_point.z) {
+    if (buf_point.depth <= z_coord) {
         return false;
     }
 
-    buf_point = BufferPoint{raster_point.z, vertex};
+    buf_point = BufferPoint{z_coord, vertex};
     return true;
 }
 

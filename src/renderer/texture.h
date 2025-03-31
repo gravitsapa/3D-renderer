@@ -3,16 +3,13 @@
 #include <string>
 #include <table.h>
 #include <color.h>
+#include <Eigen/Dense>
 
 namespace project {
 namespace kernel {
 
 using TextureCoordinate = double;
-
-struct TextureCoordinates {
-    TextureCoordinate h;
-    TextureCoordinate w;
-};
+using TextureCoordinates = Eigen::Vector2<TextureCoordinate>;
 
 class Texture {
     friend Texture ReadTextureFromFile(const std::string& filename);

@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include <string>
 #include <renderer.h>
 #include <SFML/Graphics.hpp>
@@ -16,6 +17,7 @@ public:
 private:
     void LoadSceneWithCube();
     void LoadSceneWithCoffee();
+    void LoadSceneWithChess();
     void ShowScreen();
 
     sf::RenderWindow window_;

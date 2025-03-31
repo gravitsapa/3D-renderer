@@ -35,6 +35,29 @@ void Application::LoadSceneWithCoffee() {
     world_.AddLights(lights);
 }
 
+
+void Application::LoadSceneWithChess() {
+    std::string object_folder_path = "../objects/";
+    std::string plant_mesh_path = object_folder_path + "chess/object.obj";
+    std::string plant_texture_path = object_folder_path + "chess/texture.png";
+    auto chess = kernel::Object{kernel::ReadMeshFromFile(plant_mesh_path),
+                       kernel::ReadTextureFromFile(plant_texture_path)};
+
+    kernel::PrintDebugInfo(chess, "CHESS");
+
+    world_.AddObject(
+        chess,
+        geometry::Pose{geometry::Rotation::ByAngles(0.2, 0, 0.5), geometry::Position{geometry::Vector3d{0, 0, -2}}});
+
+    double f = 1;
+    world_.AddCamera(kernel::Camera{0.5, 5, f * 1, f * 1, f * 0.75, f * 0.75});
+
+    kernel::Lights lights;
+    lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
+    lights.AddDirectionalLight(kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25),kernel::Color::White()));
+    world_.AddLights(lights);
+}
+
 void Application::LoadSceneWithCube() {
     auto rec = kernel::Object{.mesh = kernel::Mesh3d::RectangularСuboid(100, 150, 200), .texture = kernel::Texture()};
     kernel::PrintDebugInfo(rec, "RECTANGLE");

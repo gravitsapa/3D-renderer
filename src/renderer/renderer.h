@@ -14,8 +14,6 @@
 namespace project {
 namespace kernel {
 
-constexpr RasterCoordinate raster_depth_max = 1'000'000'000'000;
-
 class Renderer {
 public:
     Screen Project(const World& world, const PosedCamera& camera, Screen&& screen,

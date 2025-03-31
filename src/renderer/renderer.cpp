@@ -9,7 +9,7 @@ namespace kernel {
 
 Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
-    ZBuffer buffer(screen.GetHeight(), screen.GetWidth(), raster_depth_max + 1);
+    ZBuffer buffer(screen.GetHeight(), screen.GetWidth());
     screen.Fill(background_color);
 
     RasterizeWorld(world, buffer, screen, camera);
@@ -88,10 +88,6 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
     geometry::Point2d point_c_in_2d = geometry::TruncZ(face_in_camera_space.c.point);
     WeightsFinder weights_finder(point_a_in_2d, point_b_in_2d, point_c_in_2d);
 
-    // if (weights_finder.IsDegenerate()) {
-    //     return;
-    // }
-
     for (auto& segment : pixel_triangle.GetAllSegments()) {
         for (RasterCoordinate x = segment.left_x; x <= segment.right_x; ++x) {
             RasterPoint2d pixel = {x, segment.y};
@@ -104,35 +100,38 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
             // std::cerr << "WEIGHTS " << weights.a << ' ' << weights.b << ' ' << weights.c <<
             // std::endl;
 
-            RasterCoordinate z_coordinate_in_buffer = detail::ConvertToRasterCoordinate(
-                InterpolateCoordinate(weights, face_in_camera_space.a.point.z(),
-                                      face_in_camera_space.b.point.z(),
-                                      face_in_camera_space.c.point.z()),
-                raster_depth_max);
+            geometry::Coordinate real_inverse_z_coordinate = InterpolateCoordinate(
+                weights, 1 / face_as_viewer_see.a.point.z(), 1 / face_as_viewer_see.b.point.z(),
+                1 / face_as_viewer_see.c.point.z());
 
-            RasterPoint3d raster_point{.x = pixel.x, .y = pixel.y, .z = z_coordinate_in_buffer};
-            if (!buffer.CanToAddVertex(raster_point)) {
-                continue;
-            }
+            geometry::Coordinate z_coordinate_in_buffer = 1 / -real_inverse_z_coordinate;
 
-            geometry::Vector3d interpolated_normal = InterpolateNormals(
-                weights, global_face.a.normal, global_face.b.normal, global_face.c.normal);
+            geometry::Vector3d interpolated_normal =
+                InterpolateNormals(weights, global_face.a.normal / face_as_viewer_see.a.point.z(),
+                                   global_face.b.normal / face_as_viewer_see.b.point.z(),
+                                   global_face.c.normal / face_as_viewer_see.c.point.z()) /
+                real_inverse_z_coordinate;
 
-            geometry::Point3d interpolated_point = InterpolatePoints(
-                weights, global_face.a.point, global_face.b.point, global_face.c.point);
+            geometry::Point3d interpolated_point =
+                InterpolatePoints(weights, global_face.a.point / face_as_viewer_see.a.point.z(),
+                                  global_face.b.point / face_as_viewer_see.b.point.z(),
+                                  global_face.c.point / face_as_viewer_see.c.point.z()) /
+                real_inverse_z_coordinate;
 
             TextureCoordinates interpolated_texture_coordinates =
-                InterpolateTextureCoordinates(weights, global_face.a.text_coord,
-                                              global_face.b.text_coord, global_face.c.text_coord);
+                InterpolateTextureCoordinates(
+                    weights, global_face.a.text_coord / face_as_viewer_see.a.point.z(),
+                    global_face.b.text_coord / face_as_viewer_see.b.point.z(),
+                    global_face.c.text_coord / face_as_viewer_see.c.point.z()) /
+                real_inverse_z_coordinate;
 
-            interpolated_texture_coordinates.h =
-                std::max(0.0, std::min(1.0, interpolated_texture_coordinates.h));
-            interpolated_texture_coordinates.w =
-                std::max(0.0, std::min(1.0, interpolated_texture_coordinates.w));
+            interpolated_texture_coordinates = {
+                std::max(0.0, std::min(1.0, interpolated_texture_coordinates.x())),
+                std::max(0.0, std::min(1.0, interpolated_texture_coordinates.y()))};
 
             Color color_by_texture = texture.GetPixelColor(interpolated_texture_coordinates);
 
-            buffer.TryToAddVertex(raster_point,
+            buffer.TryToAddVertex(pixel, z_coordinate_in_buffer,
                                   PixelOriginInformation{.point = interpolated_point,
                                                          .normal = interpolated_normal,
                                                          .col = color_by_texture});

@@ -18,7 +18,7 @@ int Texture::ConvertToIndexW(TextureCoordinate w) const {
 
 Color Texture::GetPixelColor(TextureCoordinates coord) const {
     assert(data_.GetHeight() > 0 && data_.GetWidth() > 0);
-    return data_.Get(ConvertToIndexH(coord.h), ConvertToIndexW(coord.w));
+    return data_.Get(ConvertToIndexH(coord.x()), ConvertToIndexW(coord.y()));
 }
 
 }  // namespace kernel

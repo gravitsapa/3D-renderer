@@ -111,15 +111,13 @@ geometry::Vector3d ReadVector3D(std::stringstream& stream) {
 
 TextureCoordinates ReadTextureCoordinates(std::stringstream& stream) {
     TextureCoordinates coordinates;
-    stream >> coordinates.h >> coordinates.w;
-    coordinates.h -= std::floor(coordinates.h);
-    coordinates.w -= std::floor(coordinates.w);
+    stream >> coordinates.x() >> coordinates.y();
+    coordinates.x() -= std::floor(coordinates.x());
+    coordinates.y() -= std::floor(coordinates.y());
 
-    coordinates.w = 1 - coordinates.w;
-    std::swap(coordinates.h, coordinates.w);
+    coordinates.y() = 1 - coordinates.y();
+    std::swap(coordinates.x(), coordinates.y());
 
-    assert(0 <= coordinates.h && coordinates.h <= 1);
-    assert(0 <= coordinates.w && coordinates.w <= 1);
     return coordinates;
 }
 

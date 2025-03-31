@@ -48,8 +48,7 @@ TextureCoordinates InterpolateTextureCoordinates(const VertexWeights& weights,
                                                  const TextureCoordinates& a,
                                                  const TextureCoordinates& b,
                                                  const TextureCoordinates& c) {
-    return TextureCoordinates{.h = a.h * weights.a + b.h * weights.b + c.h * weights.c,
-                              .w = a.w * weights.a + b.w * weights.b + c.w * weights.c};
+    return a * weights.a + b * weights.b + c * weights.c;
 }
 
 }  // namespace kernel

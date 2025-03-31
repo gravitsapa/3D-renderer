@@ -16,16 +16,17 @@ struct PixelOriginInformation {
 };
 
 struct BufferPoint {
-    RasterCoordinate depth;
+    geometry::Coordinate depth;
     std::optional<PixelOriginInformation> vertex;
 };
 
 class ZBuffer {
 public:
-    ZBuffer(Height height, Width width, RasterCoordinate depth);
+    ZBuffer(Height height, Width width);
 
-    bool TryToAddVertex(const RasterPoint3d& raster_point, const PixelOriginInformation& vertex);
-    bool CanToAddVertex(const RasterPoint3d& raster_point);
+    bool TryToAddVertex(const RasterPoint2d& raster_point, const geometry::Coordinate& z_coord,
+                        const PixelOriginInformation& vertex);
+
     std::optional<PixelOriginInformation>& GetVertex(Height y, Width x);
     std::optional<PixelOriginInformation> GetVertex(Height y, Width x) const;
 
