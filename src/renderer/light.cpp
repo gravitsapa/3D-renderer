@@ -36,15 +36,16 @@ Color DirectionalLight::GetColorOfPointByLight(const Color& tex_color,
            light_color_ * std::pow(std::max(normal.dot(half_vector), 0.0), specular_exponent);
 }
 
-Color Lights::GetColorOfPointByLight(const Color& tex_color,
-                                               const geometry::Vector3d& normal,
-                                               const geometry::Vector3d& vector_to_viewer) const {
+Color Lights::GetColorOfPointByLight(const Color& tex_color, const geometry::Vector3d& normal,
+                                     const geometry::Vector3d& vector_to_viewer) const {
     Color res = Color::Black();
     for (auto& ambient_light : ambient_lights_) {
         res = res + ambient_light.GetColorOfPointByLight(tex_color);
     }
     for (auto& directional_light : directional_lights_) {
-        res = res + directional_light.GetColorOfPointByLight(tex_color, normal, vector_to_viewer);
+        res =
+            res + directional_light.GetColorOfPointByLight(tex_color, geometry::Normalized(normal),
+                                                           geometry::Normalized(vector_to_viewer));
     }
     return res;
 }
