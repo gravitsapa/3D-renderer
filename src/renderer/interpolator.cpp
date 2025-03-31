@@ -1,55 +1,35 @@
 #include <interpolator.h>
 #include <texture.h>
+#include <cassert>
 
 namespace project {
 namespace kernel {
 
-WeightsFinder::WeightsFinder(const geometry::Point2d& a, const geometry::Point2d& b,
-                             const geometry::Point2d& c)
-    : a_(a) {
-    if (std::abs((b - a).cross(c - a)) < epsilon_) {
-        degenerate_ = true;
-    }
-    geometry::Matrix2d ab_ac_matrix;
-    ab_ac_matrix.col(0) = b - a;
-    ab_ac_matrix.col(1) = c - a;
-    ab_ac_matrix_inv_ = ab_ac_matrix.inverse();
+InformationToInterpolate GetWeightedInformation(const VertexWeights& weights,
+                                                const InformationToInterpolate& a,
+                                                const InformationToInterpolate& b,
+                                                const InformationToInterpolate& c) {
+    return InformationToInterpolate{
+        weights.a * a.z_coord_in_camera_view + weights.b * b.z_coord_in_camera_view +
+            weights.c * c.z_coord_in_camera_view,
+        weights.a * a.z_coord_inv + weights.b * b.z_coord_inv + weights.c * c.z_coord_inv,
+        weights.a * a.normal_div_z + weights.b * b.normal_div_z + weights.c * c.normal_div_z,
+        weights.a * a.global_point_div_z + weights.b * b.global_point_div_z +
+            weights.c * c.global_point_div_z,
+        weights.a * a.tex_coord_div_z + weights.b * b.tex_coord_div_z +
+            weights.c * c.tex_coord_div_z};
 }
 
-bool WeightsFinder::IsDegenerate() {
-    return degenerate_;
-}
+// WeightsFinder::WeightsFinder(const RasterPoint2d& a, const RasterPoint2d& b, const RasterPoint2d&
+// c)
+//     : a_(a), b_(b), c_(c) {
+//     assert(a.y <= b.y && b.y <= c.y);
+// }
 
-VertexWeights WeightsFinder::FindBarycentricCoordinates(const geometry::Point2d& p) {
-    // if (degenerate_) return {1, 0, 0};
-    geometry::Vector2d solution = ab_ac_matrix_inv_ * (p - a_);
-    return VertexWeights{.a = 1 - solution.x() - solution.y(), solution.x(), solution.y()};
-}
+// VertexWeights FindWeights(const RasterPoint2d& p) {
+//     assert(a_.y <= p.y && p.y <= c_.y);
 
-geometry::Coordinate InterpolateCoordinate(const VertexWeights& weights,
-                                           const geometry::Coordinate& a,
-                                           const geometry::Coordinate& b,
-                                           const geometry::Coordinate& c) {
-    return a * weights.a + b * weights.b + c * weights.c;
-}
-
-geometry::Vector3d InterpolateNormals(const VertexWeights& weights, const geometry::Vector3d& a,
-                                      const geometry::Vector3d& b, const geometry::Vector3d& c) {
-    return geometry::Normalized(a) * weights.a + geometry::Normalized(b) * weights.b +
-           geometry::Normalized(c) * weights.c;
-}
-
-geometry::Point3d InterpolatePoints(const VertexWeights& weights, const geometry::Point3d& a,
-                                    const geometry::Point3d& b, const geometry::Point3d& c) {
-    return a * weights.a + b * weights.b + c * weights.c;
-}
-
-TextureCoordinates InterpolateTextureCoordinates(const VertexWeights& weights,
-                                                 const TextureCoordinates& a,
-                                                 const TextureCoordinates& b,
-                                                 const TextureCoordinates& c) {
-    return a * weights.a + b * weights.b + c * weights.c;
-}
+// }
 
 }  // namespace kernel
 }  // namespace project

@@ -3,9 +3,22 @@
 #include <raster_coordinates.h>
 #include <mesh3d.h>
 #include <vector>
+#include <interpolator.h>
 
 namespace project {
 namespace kernel {
+
+struct VertexForRasterizer : RasterPoint2d, InformationToInterpolate {};
+
+VertexForRasterizer PrepareForRasterization(const geometry::Point3d projected_point,
+                                            const geometry::Coordinate z_in_camera_view,
+                                            const RasterResolution& resolution,
+                                            const Vertex& global_vertex);
+
+std::vector<VertexForRasterizer> RasterizeTriangleByXY(VertexForRasterizer a, VertexForRasterizer b,
+                                                       VertexForRasterizer c);
+
+namespace detail {
 
 struct HorizontalSegment {
     RasterCoordinate y;
@@ -25,14 +38,13 @@ private:
 };
 
 RasterizedFigure BrezAlgo(RasterPoint2d a, RasterPoint2d b);
-RasterizedFigure RasterizeTriangleByXY(const Face& face, const RasterResolution& resolution);
 
-namespace detail {
+Factor GetFactorByPointInSegment(RasterCoordinate x, RasterCoordinate begin, RasterCoordinate end);
 
 HorizontalSegment Merge(const HorizontalSegment& segment1, const HorizontalSegment& segment2);
 
-void SortPointsByY(RasterPoint2d& a, RasterPoint2d& b, RasterPoint2d& c);
-void SortPointsByY(RasterPoint2d& a, RasterPoint2d& b);
+void SortVerticesByY(VertexForRasterizer& a, VertexForRasterizer& b, VertexForRasterizer& c);
+void SortVerticesByY(VertexForRasterizer& a, VertexForRasterizer& b);
 
 }  // namespace detail
 

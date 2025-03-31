@@ -30,7 +30,7 @@ Mesh3d ReadMeshFromFile(const std::string& filename) {
         if (type == "v") {
             points.push_back(detail::ReadPoint3D(stream));
         } else if (type == "vn") {
-            normals.push_back(detail::ReadVector3D(stream));
+            normals.push_back(geometry::Normalized(detail::ReadVector3D(stream)));
         } else if (type == "vt") {
             tex_coords.push_back(detail::ReadTextureCoordinates(stream));
         } else if (type == "f") {

@@ -80,62 +80,28 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
     }
 
     RasterResolution resolution{screen.GetWidth() - 1, screen.GetHeight() - 1};
-    RasterizedFigure pixel_triangle = RasterizeTriangleByXY(face_in_camera_space, resolution);
+
+    auto rasterized = RasterizeTriangleByXY(
+        PrepareForRasterization(face_in_camera_space.a.point, face_as_viewer_see.a.point.z(),
+                                resolution, global_face.a),
+        PrepareForRasterization(face_in_camera_space.b.point, face_as_viewer_see.b.point.z(),
+                                resolution, global_face.b),
+        PrepareForRasterization(face_in_camera_space.c.point, face_as_viewer_see.c.point.z(),
+                                resolution, global_face.c));
 
     Color color_by_texture = Color::Random();
-    geometry::Point2d point_a_in_2d = geometry::TruncZ(face_in_camera_space.a.point);
-    geometry::Point2d point_b_in_2d = geometry::TruncZ(face_in_camera_space.b.point);
-    geometry::Point2d point_c_in_2d = geometry::TruncZ(face_in_camera_space.c.point);
-    WeightsFinder weights_finder(point_a_in_2d, point_b_in_2d, point_c_in_2d);
 
-    for (auto& segment : pixel_triangle.GetAllSegments()) {
-        for (RasterCoordinate x = segment.left_x; x <= segment.right_x; ++x) {
-            RasterPoint2d pixel = {x, segment.y};
+    for (auto& pixel : rasterized) {
 
-            geometry::Point2d pixel_in_camera_space = ConvertToCoordinate(pixel, resolution);
+        Color color_by_texture = texture.GetPixelColor(pixel.tex_coord_div_z / pixel.z_coord_inv);
 
-            VertexWeights weights =
-                weights_finder.FindBarycentricCoordinates(pixel_in_camera_space);
-
-            // std::cerr << "WEIGHTS " << weights.a << ' ' << weights.b << ' ' << weights.c <<
-            // std::endl;
-
-            geometry::Coordinate real_inverse_z_coordinate = InterpolateCoordinate(
-                weights, 1 / face_as_viewer_see.a.point.z(), 1 / face_as_viewer_see.b.point.z(),
-                1 / face_as_viewer_see.c.point.z());
-
-            geometry::Coordinate z_coordinate_in_buffer = 1 / -real_inverse_z_coordinate;
-
-            geometry::Vector3d interpolated_normal =
-                InterpolateNormals(weights, global_face.a.normal / face_as_viewer_see.a.point.z(),
-                                   global_face.b.normal / face_as_viewer_see.b.point.z(),
-                                   global_face.c.normal / face_as_viewer_see.c.point.z()) /
-                real_inverse_z_coordinate;
-
-            geometry::Point3d interpolated_point =
-                InterpolatePoints(weights, global_face.a.point / face_as_viewer_see.a.point.z(),
-                                  global_face.b.point / face_as_viewer_see.b.point.z(),
-                                  global_face.c.point / face_as_viewer_see.c.point.z()) /
-                real_inverse_z_coordinate;
-
-            TextureCoordinates interpolated_texture_coordinates =
-                InterpolateTextureCoordinates(
-                    weights, global_face.a.text_coord / face_as_viewer_see.a.point.z(),
-                    global_face.b.text_coord / face_as_viewer_see.b.point.z(),
-                    global_face.c.text_coord / face_as_viewer_see.c.point.z()) /
-                real_inverse_z_coordinate;
-
-            interpolated_texture_coordinates = {
-                std::max(0.0, std::min(1.0, interpolated_texture_coordinates.x())),
-                std::max(0.0, std::min(1.0, interpolated_texture_coordinates.y()))};
-
-            Color color_by_texture = texture.GetPixelColor(interpolated_texture_coordinates);
-
-            buffer.TryToAddVertex(pixel, z_coordinate_in_buffer,
-                                  PixelOriginInformation{.point = interpolated_point,
-                                                         .normal = interpolated_normal,
-                                                         .col = color_by_texture});
-        }
+        // std::cerr << pixel.z_coord_in_camera_view << std::endl;
+        assert(std::abs(pixel.z_coord_in_camera_view) <= 1);
+        buffer.TryToAddVertex(
+            pixel, pixel.z_coord_in_camera_view,
+            PixelOriginInformation{.point = pixel.global_point_div_z / pixel.z_coord_inv,
+                                   .normal = geometry::Normalized(pixel.normal_div_z / pixel.z_coord_inv),
+                                   .col = color_by_texture});
     }
 }
 

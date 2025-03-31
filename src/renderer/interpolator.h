@@ -2,9 +2,18 @@
 
 #include <point.h>
 #include <texture.h>
+#include <raster_coordinates.h>
 
 namespace project {
 namespace kernel {
+    
+struct InformationToInterpolate {
+    geometry::Coordinate z_coord_in_camera_view;
+    geometry::Coordinate z_coord_inv;
+    geometry::Vector3d normal_div_z;
+    geometry::Point3d global_point_div_z;
+    TextureCoordinates tex_coord_div_z;
+};
 
 using Factor = double;
 struct VertexWeights {
@@ -13,36 +22,22 @@ struct VertexWeights {
     Factor c;
 };
 
-class WeightsFinder {
-public:
-    WeightsFinder(const geometry::Point2d& a, const geometry::Point2d& b,
-                  const geometry::Point2d& c);
+InformationToInterpolate GetWeightedInformation(const VertexWeights& weights,
+                                                const InformationToInterpolate& a,
+                                                const InformationToInterpolate& b,
+                                                const InformationToInterpolate& c);
 
-    VertexWeights FindBarycentricCoordinates(const geometry::Point2d& p);
-    bool IsDegenerate();
+// class WeightsFinder {
+// public:
+//     WeightsFinder(const RasterPoint2d& a, const RasterPoint2d& b, const RasterPoint2d& c);
 
-private:
-    static constexpr geometry::Coordinate epsilon_ = 1e-5;
-    bool degenerate_ = false;
-    geometry::Matrix2d ab_ac_matrix_inv_;
-    geometry::Point2d a_;
-};
-
-geometry::Coordinate InterpolateCoordinate(const VertexWeights& weights,
-                                           const geometry::Coordinate& a,
-                                           const geometry::Coordinate& b,
-                                           const geometry::Coordinate& c);
-
-geometry::Vector3d InterpolateNormals(const VertexWeights& weights, const geometry::Vector3d& a,
-                                      const geometry::Vector3d& b, const geometry::Vector3d& c);
-
-geometry::Point3d InterpolatePoints(const VertexWeights& weights, const geometry::Point3d& a,
-                                    const geometry::Point3d& b, const geometry::Point3d& c);
-
-TextureCoordinates InterpolateTextureCoordinates(const VertexWeights& weights,
-                                                 const TextureCoordinates& a,
-                                                 const TextureCoordinates& b,
-                                                 const TextureCoordinates& c);
+//     VertexWeights FindWeights(const RasterPoint2d& p, RasterCoordinate left_x, RasterCoordinate
+//     right_x);
+// private:
+//     RasterPoint2d a_;
+//     RasterPoint2d b_;
+//     RasterPoint2d c_;
+// };
 
 }  // namespace kernel
 }  // namespace project
