@@ -16,6 +16,7 @@ public:
 
 private:
     void LoadSceneWithCube();
+    void LoadSceneWithHouse();
     void LoadSceneWithCoffee();
     void LoadSceneWithChess();
     void ShowScreen();

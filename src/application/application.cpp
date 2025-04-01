@@ -10,7 +10,29 @@ namespace application {
 Application::Application(kernel::Height screen_height, kernel::Width screen_width)
     : screen_(screen_height, screen_width),
       window_(sf::VideoMode({screen_width, screen_height}), "3D-renderer") {
-    LoadSceneWithCoffee();
+    LoadSceneWithHouse();
+}
+
+void Application::LoadSceneWithHouse() {
+    std::string object_folder_path = "../objects/";
+    std::string house_mesh_path = object_folder_path + "house/object.obj";
+    std::string house_texture_path = object_folder_path + "house/texture.png";
+    auto house = kernel::Object{kernel::ReadMeshFromFile(house_mesh_path),
+                       kernel::ReadTextureFromFile(house_texture_path)};
+
+    kernel::PrintDebugInfo(house, "HOUSE");
+
+    world_.AddObject(
+        house,
+        geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.9, 0.5), geometry::Position{geometry::Vector3d{0, 5, -30}}});
+
+    double f = 0.25;
+    world_.AddCamera(kernel::Camera{3, 60, f * 20, f * 20, f * 15, f * 15});
+
+    kernel::Lights lights;
+    lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
+    lights.AddDirectionalLight(kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25),kernel::Color::White()));
+    world_.AddLights(lights);
 }
 
 void Application::LoadSceneWithCoffee() {
@@ -47,9 +69,9 @@ void Application::LoadSceneWithChess() {
 
     world_.AddObject(
         chess,
-        geometry::Pose{geometry::Rotation::ByAngles(0.2, 0, 0.5), geometry::Position{geometry::Vector3d{0, 0, -2}}});
+        geometry::Pose{geometry::Rotation::ByAngles(0.2, 0, 0.5), geometry::Position{geometry::Vector3d{-0.5, -0.5, -2}}});
 
-    double f = 1;
+    double f = 0.5;
     world_.AddCamera(kernel::Camera{0.5, 5, f * 1, f * 1, f * 0.75, f * 0.75});
 
     kernel::Lights lights;
