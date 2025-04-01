@@ -13,6 +13,10 @@
 namespace project {
 namespace kernel {
 
+Object ReadObjectFromFiles(const std::string& mesh_path, const std::string& texture_path) {
+    return Object{ReadMeshFromFile(mesh_path), ReadTextureFromFile(texture_path)};
+}
+
 Mesh3d ReadMeshFromFile(const std::string& filename) {
     std::ifstream obj_file = detail::OpenFileStream(filename);
 

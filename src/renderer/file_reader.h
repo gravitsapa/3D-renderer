@@ -12,6 +12,8 @@ Mesh3d ReadMeshFromFile(const std::string& filename);
 
 Texture ReadTextureFromFile(const std::string& filename);
 
+Object ReadObjectFromFiles(const std::string& mesh_path, const std::string& texture_path);
+
 namespace detail {
 
 std::ifstream OpenFileStream(const std::string& filename);
