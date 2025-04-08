@@ -42,7 +42,7 @@ Mesh3d ReadMeshFromFile(const std::string& filename) {
             while (detail::LineIsNotEmpty(stream)) {
                 auto indexes = detail::ReadVertexIndexes(stream);
                 vertices.push_back(
-                    detail::CreateVectexFromIndexes(indexes, points, normals, tex_coords));
+                    detail::CreateVertexFromIndexes(indexes, points, normals, tex_coords));
             }
 
             if (vertices.size() < 3) {
@@ -55,7 +55,7 @@ Mesh3d ReadMeshFromFile(const std::string& filename) {
         }
     }
 
-    return Mesh3d(faces);
+    return Mesh3d(std::move(faces));
 }
 
 Texture ReadTextureFromFile(const std::string& filename) {
@@ -152,7 +152,7 @@ ObjFileVertexIndexes ReadVertexIndexes(std::stringstream& stream) {
     return indexes;
 }
 
-Vertex CreateVectexFromIndexes(ObjFileVertexIndexes indexes,
+Vertex CreateVertexFromIndexes(const ObjFileVertexIndexes& indexes,
                                const std::vector<geometry::Point3d>& points,
                                const std::vector<geometry::Vector3d>& normals,
                                const std::vector<TextureCoordinates>& tex_coords) {

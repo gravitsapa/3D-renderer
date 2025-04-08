@@ -17,7 +17,7 @@ class Texture {
 public:
     Texture();
 
-    Color GetPixelColor(TextureCoordinates coord) const;
+    Color GetPixelColor(const TextureCoordinates& coord) const;
 
 private:
     int ConvertToIndexH(TextureCoordinate h) const;

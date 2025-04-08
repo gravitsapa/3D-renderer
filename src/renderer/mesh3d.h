@@ -32,7 +32,7 @@ public:
 
 private:
     Mesh3d() = default;
-    Mesh3d(std::vector<Face> faces);
+    Mesh3d(std::vector<Face>&& faces);
     
     std::vector<Face> faces_;
 };

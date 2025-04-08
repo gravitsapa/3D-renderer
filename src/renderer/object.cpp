@@ -5,7 +5,7 @@
 
 namespace project {
 namespace kernel {
-    
+
 void PrintDebugInfo(const Object& object, const std::string& object_name) {
     std::cerr << "DEBUG INFO ABOUT OBJECT: " << object_name << std::endl;
     const auto& faces = object.mesh.GetAllFaces();

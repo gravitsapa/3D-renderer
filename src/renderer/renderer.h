@@ -27,7 +27,8 @@ private:
     void RasterizeGlobalVertex(const Face& face, const Texture& texture, const geometry::Pose& pose,
                                ZBuffer& buffer, Screen& screen, const PosedCamera& camera);
 
-    void GetColorOfEachPixelByLights(const Lights& lights, ZBuffer& buffer, const PosedCamera& camera);
+    void GetColorOfEachPixelByLights(const Lights& lights, ZBuffer& buffer,
+                                     const PosedCamera& camera);
     void PrintAllPixelsFromBufferToScreen(const ZBuffer& buffer, Screen& screen);
 };
 

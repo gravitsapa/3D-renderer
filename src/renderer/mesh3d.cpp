@@ -7,7 +7,7 @@ const std::vector<Face>& Mesh3d::GetAllFaces() const {
     return faces_;
 }
 
-Mesh3d::Mesh3d(std::vector<Face> faces) : faces_(std::move(faces)) {
+Mesh3d::Mesh3d(std::vector<Face>&& faces) : faces_(std::move(faces)) {
 }
 
 Mesh3d Mesh3d::RectangularСuboid(const geometry::Point3d& center, geometry::Coordinate w,

@@ -41,7 +41,7 @@ struct ObjFileVertexIndexes {
 
 ObjFileVertexIndexes ReadVertexIndexes(std::stringstream& stream);
 
-Vertex CreateVectexFromIndexes(ObjFileVertexIndexes indexes,
+Vertex CreateVertexFromIndexes(const ObjFileVertexIndexes& indexes,
                                const std::vector<geometry::Point3d>& points,
                                const std::vector<geometry::Vector3d>& normals,
                                const std::vector<TextureCoordinates>& tex_coords);

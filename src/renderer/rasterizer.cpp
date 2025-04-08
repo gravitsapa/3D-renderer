@@ -4,8 +4,8 @@
 namespace project {
 namespace kernel {
 
-VertexForRasterizer PrepareForRasterization(const geometry::Point3d projected_point,
-                                            const geometry::Coordinate z_in_camera_view,
+VertexForRasterizer PrepareForRasterization(const geometry::Point3d& projected_point,
+                                            const geometry::Coordinate& z_in_camera_view,
                                             const RasterResolution& resolution,
                                             const Vertex& global_vertex) {
     auto inv_z = 1 / z_in_camera_view;
@@ -24,8 +24,6 @@ std::vector<VertexForRasterizer> RasterizeTriangleByXY(VertexForRasterizer a, Ve
     if (a.y == c.y) {
         return {};
     }
-
-    // Color col_here = Color::Random();
 
     RasterCoordinate height = c.y - a.y;
     for (RasterCoordinate h = 0; h < height; ++h) {

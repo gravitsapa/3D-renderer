@@ -10,8 +10,8 @@ namespace kernel {
 
 struct VertexForRasterizer : RasterPoint2d, InformationToInterpolate {};
 
-VertexForRasterizer PrepareForRasterization(const geometry::Point3d projected_point,
-                                            const geometry::Coordinate z_in_camera_view,
+VertexForRasterizer PrepareForRasterization(const geometry::Point3d& projected_point,
+                                            const geometry::Coordinate& z_in_camera_view,
                                             const RasterResolution& resolution,
                                             const Vertex& global_vertex);
 

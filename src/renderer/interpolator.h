@@ -6,7 +6,7 @@
 
 namespace project {
 namespace kernel {
-    
+
 struct InformationToInterpolate {
     geometry::Coordinate z_coord_in_camera_view;
     geometry::Coordinate z_coord_inv;
@@ -26,18 +26,6 @@ InformationToInterpolate GetWeightedInformation(const VertexWeights& weights,
                                                 const InformationToInterpolate& a,
                                                 const InformationToInterpolate& b,
                                                 const InformationToInterpolate& c);
-
-// class WeightsFinder {
-// public:
-//     WeightsFinder(const RasterPoint2d& a, const RasterPoint2d& b, const RasterPoint2d& c);
-
-//     VertexWeights FindWeights(const RasterPoint2d& p, RasterCoordinate left_x, RasterCoordinate
-//     right_x);
-// private:
-//     RasterPoint2d a_;
-//     RasterPoint2d b_;
-//     RasterPoint2d c_;
-// };
 
 }  // namespace kernel
 }  // namespace project

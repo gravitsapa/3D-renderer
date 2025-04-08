@@ -20,16 +20,5 @@ InformationToInterpolate GetWeightedInformation(const VertexWeights& weights,
             weights.c * c.tex_coord_div_z};
 }
 
-// WeightsFinder::WeightsFinder(const RasterPoint2d& a, const RasterPoint2d& b, const RasterPoint2d&
-// c)
-//     : a_(a), b_(b), c_(c) {
-//     assert(a.y <= b.y && b.y <= c.y);
-// }
-
-// VertexWeights FindWeights(const RasterPoint2d& p) {
-//     assert(a_.y <= p.y && p.y <= c_.y);
-
-// }
-
 }  // namespace kernel
 }  // namespace project

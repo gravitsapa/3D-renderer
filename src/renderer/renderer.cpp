@@ -95,13 +95,13 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
 
         Color color_by_texture = texture.GetPixelColor(pixel.tex_coord_div_z / pixel.z_coord_inv);
 
-        // std::cerr << pixel.z_coord_in_camera_view << std::endl;
         assert(std::abs(pixel.z_coord_in_camera_view) <= 1);
         buffer.TryToAddVertex(
             pixel, pixel.z_coord_in_camera_view,
-            PixelOriginInformation{.point = pixel.global_point_div_z / pixel.z_coord_inv,
-                                   .normal = geometry::Normalized(pixel.normal_div_z / pixel.z_coord_inv),
-                                   .col = color_by_texture});
+            PixelOriginInformation{
+                .point = pixel.global_point_div_z / pixel.z_coord_inv,
+                .normal = geometry::Normalized(pixel.normal_div_z / pixel.z_coord_inv),
+                .col = color_by_texture});
     }
 }
 

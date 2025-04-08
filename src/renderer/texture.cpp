@@ -16,7 +16,7 @@ int Texture::ConvertToIndexW(TextureCoordinate w) const {
     return static_cast<int>(w * (data_.GetWidth() - 1));
 }
 
-Color Texture::GetPixelColor(TextureCoordinates coord) const {
+Color Texture::GetPixelColor(const TextureCoordinates& coord) const {
     assert(data_.GetHeight() > 0 && data_.GetWidth() > 0);
     return data_.Get(ConvertToIndexH(coord.x()), ConvertToIndexW(coord.y()));
 }
