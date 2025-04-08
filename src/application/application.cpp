@@ -3,6 +3,7 @@
 #include <renderer.h>
 #include <file_reader.h>
 #include <SFML/Graphics.hpp>
+#include <ctime>
 
 namespace project {
 namespace application {
@@ -21,10 +22,10 @@ void Application::LoadSceneWithHouse() {
     kernel::PrintDebugInfo(house, "HOUSE");
 
     world_.AddObject(house, geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.9, 0.5),
-                                           geometry::Position{geometry::Vector3d{0, 5, -30}}});
+                                           geometry::Position{geometry::Point3d{0, 5, -50}}});
 
     double f = 0.25;
-    world_.AddCamera(kernel::Camera{3, 60, f * 20, f * 20, f * 15, f * 15});
+    world_.AddCamera(kernel::Camera{3, 100, f * 20, f * 20, f * 15, f * 15});
 
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
@@ -103,7 +104,10 @@ void Application::Run() {
 
     double angle = 0;
 
-    while (window_.isOpen()) {
+    std::vector<int> s;
+    
+    while (window_.isOpen() && s.size() < 300) {
+        auto start = clock();
         while (const std::optional event = window_.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window_.close();
@@ -118,8 +122,13 @@ void Application::Run() {
         pose.rot_matrix = geometry::Rotation::ByAngles(angle, angle, angle).rot_matrix;
         world_.MoveObject(0, pose);
 
-        std::cerr << "PU" << std::endl;
+        auto t = (double)(clock() - start) / CLOCKS_PER_SEC;
+        s.push_back(1 / t);
     }
+
+    int sum = 0;
+    for (auto i : s) sum += i;
+    std::cerr << sum / s.size() << std::endl;
 }
 
 }  // namespace application
