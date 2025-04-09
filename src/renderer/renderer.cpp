@@ -7,14 +7,18 @@
 namespace project {
 namespace kernel {
 
+Renderer::Renderer(Height screen_height, Width screen_width)
+    : buffer_(screen_height, screen_width) {
+}
+
 Screen Renderer::Project(const World& world, const PosedCamera& camera, Screen&& screen,
                          const Color& background_color) {
-    ZBuffer buffer(screen.GetHeight(), screen.GetWidth());
+    buffer_.Assign(screen.GetHeight(), screen.GetWidth());
     screen.Fill(background_color);
 
-    RasterizeWorld(world, buffer, screen, camera);
-    GetColorOfEachPixelByLights(world.GetLights(), buffer, camera);
-    PrintAllPixelsFromBufferToScreen(buffer, screen);
+    RasterizeWorld(world, buffer_, screen, camera);
+    GetColorOfEachPixelByLights(world.GetLights(), buffer_, camera);
+    PrintAllPixelsFromBufferToScreen(buffer_, screen);
 
     return screen;
 }

@@ -16,6 +16,7 @@ namespace kernel {
 
 class Renderer {
 public:
+    Renderer(Height screen_height, Width screen_width);
     Screen Project(const World& world, const PosedCamera& camera, Screen&& screen,
                    const Color& background_color = Color::White());
 
@@ -30,6 +31,8 @@ private:
     void GetColorOfEachPixelByLights(const Lights& lights, ZBuffer& buffer,
                                      const PosedCamera& camera);
     void PrintAllPixelsFromBufferToScreen(const ZBuffer& buffer, Screen& screen);
+
+    ZBuffer buffer_;
 };
 
 namespace detail {

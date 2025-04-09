@@ -4,12 +4,18 @@
 namespace project {
 namespace kernel {
 
-ZBuffer::ZBuffer(Height height, Width width)
-    : buffer_(height, width, BufferPoint{std::numeric_limits<geometry::Coordinate>::infinity(), std::nullopt}) {
+BufferPoint ZBuffer::EmptyPoint() {
+    return BufferPoint{std::numeric_limits<geometry::Coordinate>::infinity(), std::nullopt};
 }
 
-bool ZBuffer::TryToAddVertex(const RasterPoint2d& raster_point,
-                             const geometry::Coordinate& z_coord,
+ZBuffer::ZBuffer(Height height, Width width) : buffer_(height, width, EmptyPoint()) {
+}
+
+void ZBuffer::Assign(Height height, Width width) {
+    buffer_.Assign(height, width, EmptyPoint());
+}
+
+bool ZBuffer::TryToAddVertex(const RasterPoint2d& raster_point, const geometry::Coordinate& z_coord,
                              const PixelOriginInformation& vertex) {
     auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
     if (buf_point.depth <= z_coord) {

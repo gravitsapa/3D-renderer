@@ -23,6 +23,7 @@ struct BufferPoint {
 class ZBuffer {
 public:
     ZBuffer(Height height, Width width);
+    void Assign(Height height, Width width);
 
     bool TryToAddVertex(const RasterPoint2d& raster_point, const geometry::Coordinate& z_coord,
                         const PixelOriginInformation& vertex);
@@ -35,6 +36,7 @@ public:
 
 private:
     structures::Table<BufferPoint> buffer_;
+    static BufferPoint EmptyPoint();
 };
 
 }  // namespace kernel

@@ -12,10 +12,11 @@ public:
     Table() = default;
     Table(size_t h, size_t w);
     Table(size_t h, size_t w, const T& value);
-
+    
     T Get(size_t x, size_t y) const;
     T& Get(size_t x, size_t y);
     void Fill(const T& value);
+    void Assign(size_t h, size_t w, const T& value);
 
     size_t GetHeight() const;
     size_t GetWidth() const;
@@ -46,6 +47,11 @@ template <class T>
 T& Table<T>::Get(size_t x, size_t y) {
     assert(x < height_ && y < width_ && "Incorrect indexes");
     return data_[x * width_ + y];
+}
+
+template <class T>
+void Table<T>::Assign(size_t h, size_t w, const T& value) {
+    data_.assign(h * w, value);
 }
 
 template <class T>

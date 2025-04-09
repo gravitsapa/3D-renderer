@@ -11,7 +11,8 @@ namespace application {
 Application::Application(kernel::Height screen_height, kernel::Width screen_width,
                          std::string scene_name)
     : screen_(screen_height, screen_width),
-      window_(sf::VideoMode({screen_width, screen_height}), "3D-renderer") {
+      window_(sf::VideoMode({screen_width, screen_height}), "3D-renderer"), 
+      renderer_(screen_height, screen_width) {
 
     if (scene_name == "coffee") {
         LoadSceneWithCoffee();
