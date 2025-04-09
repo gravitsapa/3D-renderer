@@ -36,6 +36,8 @@ private:
 };
 
 namespace detail {
+bool FaceIsVisibleInCamera(const Face& face, const PosedCamera& camera);
+
 Vertex MoveFromLocalToGlobalCoordinates(const Vertex& local_face, const geometry::Pose& pose);
 
 Vertex MoveFromGlobalToViewerCoordinates(const Vertex& global_face,

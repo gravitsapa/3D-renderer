@@ -14,6 +14,7 @@ add_executable(3D-renderer
     src/renderer/object.cpp 
     src/geometry/pose.cpp
     src/geometry/point.cpp
+    src/geometry/geom_calc.cpp
     src/renderer/camera.cpp
     src/renderer/renderer.cpp
     src/renderer/screen.cpp

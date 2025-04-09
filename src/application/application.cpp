@@ -52,7 +52,7 @@ void Application::LoadSceneWithHouse() {
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
     lights.AddDirectionalLight(
-        kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25), kernel::Color::White()));
+        kernel::DirectionalLight(geometry::Vector3d(-1, -1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
 
     frame_processor_ = detail::RotateProcessor;
@@ -67,7 +67,7 @@ void Application::LoadSceneWithCoffee() {
     kernel::PrintDebugInfo(coffee, "COFFEE");
 
     world_.AddObject(coffee, geometry::Pose{geometry::Rotation(),
-                                            geometry::Position{geometry::Vector3d{0, 0.4, -0.8}}});
+                                            geometry::Position{geometry::Vector3d{0.2, -0.4, -0.8}}});
 
     detail::CameraPlaneSize camera_plane_size = ExpandSizeAccordingToResolution(
         detail::CameraPlaneSize{0.5, 0.5}, screen_.GetHeight(), screen_.GetWidth());
@@ -77,7 +77,7 @@ void Application::LoadSceneWithCoffee() {
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
     lights.AddDirectionalLight(
-        kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25), kernel::Color::White()));
+        kernel::DirectionalLight(geometry::Vector3d(-1, -1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
 
     frame_processor_ = detail::RotateProcessor;
@@ -103,7 +103,7 @@ void Application::LoadSceneWithChess() {
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
     lights.AddDirectionalLight(
-        kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25), kernel::Color::White()));
+        kernel::DirectionalLight(geometry::Vector3d(-1, -1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
 
     frame_processor_ = detail::RotateProcessor;
@@ -154,7 +154,7 @@ const kernel::PosedCamera& RotateProcessor(kernel::World& world) {
     double alpha = timer.TimeInSeconds() / 3;
 
     auto new_pose = geometry::Pose(world.GetObject(0));
-    new_pose.rot_matrix = geometry::Rotation::ByAngles(alpha, alpha, alpha).rot_matrix;
+    new_pose.rot_matrix = geometry::Rotation::ByAngles(0, alpha, 0).rot_matrix;
 
     world.MoveObject(0, new_pose);
     return world.GetCamera(0);
