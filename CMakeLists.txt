@@ -26,8 +26,11 @@ add_executable(3D-renderer
     src/renderer/raster_coordinates.cpp
     src/renderer/rasterizer.cpp
     src/renderer/interpolator.cpp
+    src/application/arg_parser.cpp
     src/application/application.cpp
+    src/application/user_manual.cpp
     src/application/except.cpp 
+    src/application/timer.cpp
     src/application/main.cpp 
     )
 

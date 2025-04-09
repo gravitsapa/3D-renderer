@@ -4,13 +4,31 @@
 #include <file_reader.h>
 #include <SFML/Graphics.hpp>
 #include <ctime>
+#include <timer.h>
 
 namespace project {
 namespace application {
-Application::Application(kernel::Height screen_height, kernel::Width screen_width)
+Application::Application(kernel::Height screen_height, kernel::Width screen_width,
+                         std::string scene_name)
     : screen_(screen_height, screen_width),
       window_(sf::VideoMode({screen_width, screen_height}), "3D-renderer") {
-    LoadSceneWithHouse();
+
+    if (scene_name == "coffee") {
+        LoadSceneWithCoffee();
+    } else if (scene_name == "house") {
+        LoadSceneWithHouse();
+    } else if (scene_name == "chess") {
+        LoadSceneWithChess();
+    } else {
+        LoadEmptyScene();
+    }
+}
+
+void Application::LoadEmptyScene() {
+    world_.AddCamera(kernel::Camera(1, 2, 1, 1, 1, 1));
+    frame_processor_ = [](kernel::World& world) -> const kernel::PosedCamera& {
+        return world.GetCamera(0);
+    };
 }
 
 void Application::LoadSceneWithHouse() {
@@ -24,14 +42,15 @@ void Application::LoadSceneWithHouse() {
     world_.AddObject(house, geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.9, 0.5),
                                            geometry::Position{geometry::Point3d{0, 5, -50}}});
 
-    double f = 0.25;
-    world_.AddCamera(kernel::Camera{3, 100, f * 20, f * 20, f * 15, f * 15});
+    world_.AddCamera(kernel::Camera{3, 100, 2.5, 2.5, 3.75 / 2, 3.75 / 2});
 
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
     lights.AddDirectionalLight(
         kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
+
+    frame_processor_ = detail::RotateProcessor;
 }
 
 void Application::LoadSceneWithCoffee() {
@@ -45,14 +64,15 @@ void Application::LoadSceneWithCoffee() {
     world_.AddObject(coffee, geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.5, 0),
                                             geometry::Position{geometry::Vector3d{0, 0.4, -0.8}}});
 
-    double f = 0.5;
-    world_.AddCamera(kernel::Camera{0.5, 2, f * 1, f * 1, f * 0.75, f * 0.75});
+    world_.AddCamera(kernel::Camera{0.5, 2, 0.5, 0.5, 0.375, 0.375});
 
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
     lights.AddDirectionalLight(
         kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
+
+    frame_processor_ = detail::RotateProcessor;
 }
 
 void Application::LoadSceneWithChess() {
@@ -67,29 +87,15 @@ void Application::LoadSceneWithChess() {
     world_.AddObject(chess, geometry::Pose{geometry::Rotation::ByAngles(0.2, 0, 0.5),
                                            geometry::Position{geometry::Vector3d{-0.5, -0.5, -2}}});
 
-    double f = 0.5;
-    world_.AddCamera(kernel::Camera{0.5, 5, f * 1, f * 1, f * 0.75, f * 0.75});
+    world_.AddCamera(kernel::Camera{0.5, 5, 0.5, 0.5, 0.375, 0.375});
 
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
     lights.AddDirectionalLight(
         kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
-}
 
-void Application::LoadSceneWithCube() {
-    auto rec = kernel::Object{.mesh = kernel::Mesh3d::RectangularСuboid(100, 150, 200),
-                              .texture = kernel::Texture()};
-    kernel::PrintDebugInfo(rec, "RECTANGLE");
-    world_.AddObject(rec, geometry::Pose{geometry::Rotation::ByAngles(0, 0.75, 0.75),
-                                         geometry::Position{geometry::Vector3d{0, 0, -200}}});
-
-    world_.AddCamera(kernel::Camera{50, 500, 200, 200, 150, 150});
-    kernel::Lights lights;
-    lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
-    lights.AddDirectionalLight(
-        kernel::DirectionalLight(geometry::Vector3d(-1, 1, -0.25), kernel::Color::White()));
-    world_.AddLights(lights);
+    frame_processor_ = detail::RotateProcessor;
 }
 
 void Application::ShowScreen() {
@@ -101,35 +107,39 @@ void Application::ShowScreen() {
 }
 
 void Application::Run() {
-
-    double angle = 0;
-
-    std::vector<int> s;
-    
-    while (window_.isOpen() && s.size() < 300) {
-        auto start = clock();
+    Timer timer(5 * CLOCKS_PER_SEC);
+    int frames_done = 0;
+    while (window_.isOpen()) {
         while (const std::optional event = window_.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window_.close();
             }
         }
 
-        screen_ = renderer_.Project(world_, world_.GetCamera(0), std::move(screen_));
+        auto camera = frame_processor_(world_);
+        screen_ = renderer_.Project(world_, camera, std::move(screen_));
         ShowScreen();
 
-        angle += 0.1;
-        auto pose = geometry::Pose(world_.GetObject(0));
-        pose.rot_matrix = geometry::Rotation::ByAngles(angle, angle, angle).rot_matrix;
-        world_.MoveObject(0, pose);
-
-        auto t = (double)(clock() - start) / CLOCKS_PER_SEC;
-        s.push_back(1 / t);
+        frames_done++;
+        if (timer.Tick()) {
+            double mean_fps = static_cast<double>(frames_done) / timer.TimeInSeconds();
+            std::cout << "Mean fps: " << mean_fps << std::endl;
+        }
     }
-
-    int sum = 0;
-    for (auto i : s) sum += i;
-    std::cerr << sum / s.size() << std::endl;
 }
+
+namespace detail {
+const kernel::PosedCamera& RotateProcessor(kernel::World& world) {
+    static Timer timer = Timer();
+    double alpha = timer.TimeInSeconds() / 3;
+
+    auto new_pose = geometry::Pose(world.GetObject(0));
+    new_pose.rot_matrix = geometry::Rotation::ByAngles(alpha, alpha, alpha).rot_matrix;
+
+    world.MoveObject(0, new_pose);
+    return world.GetCamera(0);
+}
+}  // namespace detail
 
 }  // namespace application
 }  // namespace project
