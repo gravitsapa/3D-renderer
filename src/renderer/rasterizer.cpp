@@ -26,6 +26,24 @@ std::vector<VertexForRasterizer> RasterizeTriangleByXY(VertexForRasterizer a, Ve
     }
 
     RasterCoordinate height = c.y - a.y;
+    InformationToInterpolate alpha_info = InformationToInterpolate(a);
+    InformationToInterpolate alpha_info_step =
+        (InformationToInterpolate(c) - InformationToInterpolate(a)) * (1.0 / height);
+
+    InformationToInterpolate beta_info_first = InformationToInterpolate(a);
+    InformationToInterpolate beta_info_first_step;
+    if (b.y - a.y) {
+        beta_info_first_step =
+            (InformationToInterpolate(b) - InformationToInterpolate(a)) * (1.0 / (b.y - a.y));
+    }
+
+    InformationToInterpolate beta_info_second = InformationToInterpolate(b);
+    InformationToInterpolate beta_info_second_step;
+    if (c.y - b.y) {
+        beta_info_second_step =
+            (InformationToInterpolate(c) - InformationToInterpolate(b)) * (1.0 / (c.y - b.y));
+    }
+
     for (RasterCoordinate h = 0; h < height; ++h) {
         bool second_seg = h > b.y - a.y || b.y == a.y;
         RasterCoordinate seg_height = second_seg ? c.y - b.y : b.y - a.y;
@@ -34,53 +52,50 @@ std::vector<VertexForRasterizer> RasterizeTriangleByXY(VertexForRasterizer a, Ve
         Factor beta = (Factor)(second_seg ? h - b.y + a.y : h) / seg_height;
 
         RasterCoordinate alpha_x = a.x + (c.x - a.x) * alpha;
-        RasterCoordinate beta_x;
-        if (second_seg) {
-            beta_x = b.x + (c.x - b.x) * beta;
-        } else {
-            beta_x = a.x + (b.x - a.x) * beta;
+        if (h > 0) {
+            alpha_info = alpha_info + alpha_info_step;
         }
 
-        if (alpha_x <= beta_x) {
-            RasterCoordinate y = a.y + h;
-            for (RasterCoordinate x = alpha_x; x <= beta_x; x++) {
-                Factor gamma = 0;
-                if (beta_x > alpha_x) {
-                    gamma = (Factor)(x - alpha_x) / (beta_x - alpha_x);
-                }
+        RasterCoordinate beta_x;
+        InformationToInterpolate beta_info;
 
-                VertexWeights weights;
-                if (second_seg) {
-                    weights = {(1 - alpha) * (1 - gamma), (1 - beta) * gamma,
-                               alpha * (1 - gamma) + beta * gamma};
-                } else {
-                    weights = {(1 - alpha) * (1 - gamma) + (1 - beta) * gamma, beta * gamma,
-                               alpha * (1 - gamma)};
-                }
-
-                rasterized.push_back(VertexForRasterizer{RasterPoint2d{x, y},
-                                                         GetWeightedInformation(weights, a, b, c)});
+        if (second_seg) {
+            beta_x = b.x + (c.x - b.x) * beta;
+            if (a.y + h > b.y) {
+                beta_info_second = beta_info_second + beta_info_second_step;
             }
+            beta_info = beta_info_second;
         } else {
-            RasterCoordinate y = a.y + h;
-            for (RasterCoordinate x = beta_x; x <= alpha_x; x++) {
-                Factor gamma = 0;
-                if (alpha_x > beta_x) {
-                    gamma = (Factor)(x - beta_x) / (alpha_x - beta_x);
-                }
-
-                VertexWeights weights;
-                if (second_seg) {
-                    weights = {(1 - alpha) * gamma, (1 - beta) * (1 - gamma),
-                               alpha * gamma + beta * (1 - gamma)};
-                } else {
-                    weights = {(1 - beta) * (1 - gamma) + (1 - alpha) * gamma, beta * (1 - gamma),
-                               alpha * gamma};
-                }
-
-                rasterized.push_back(VertexForRasterizer{RasterPoint2d{x, y},
-                                                         GetWeightedInformation(weights, a, b, c)});
+            beta_x = a.x + (b.x - a.x) * beta;
+            if (h > 0) {
+                beta_info_first = beta_info_first + beta_info_first_step;
             }
+            beta_info = beta_info_first;
+        }
+
+        InformationToInterpolate left_info;
+        InformationToInterpolate right_info;
+        if (alpha_x <= beta_x) {
+            left_info = alpha_info;
+            right_info = beta_info;
+        } else {
+            left_info = beta_info;
+            right_info = alpha_info;
+            std::swap(alpha_x, beta_x);
+        }
+
+        RasterCoordinate y = a.y + h;
+        InformationToInterpolate gamma_info = left_info;
+        InformationToInterpolate gamma_info_step;
+        if (beta_x > alpha_x) {
+            gamma_info_step = (right_info - left_info) * (1.0 / (beta_x - alpha_x));
+        }
+        for (RasterCoordinate x = alpha_x; x <= beta_x; x++) {
+            if (x > alpha_x) {
+                gamma_info = gamma_info + gamma_info_step;
+            }
+
+            rasterized.push_back(VertexForRasterizer{RasterPoint2d{x, y}, gamma_info});
         }
     }
 

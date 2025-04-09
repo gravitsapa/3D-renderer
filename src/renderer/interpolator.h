@@ -16,16 +16,14 @@ struct InformationToInterpolate {
 };
 
 using Factor = double;
-struct VertexWeights {
-    Factor a;
-    Factor b;
-    Factor c;
-};
 
-InformationToInterpolate GetWeightedInformation(const VertexWeights& weights,
-                                                const InformationToInterpolate& a,
-                                                const InformationToInterpolate& b,
-                                                const InformationToInterpolate& c);
+InformationToInterpolate operator+(const InformationToInterpolate& lhs,
+                                   const InformationToInterpolate& rhs);
+InformationToInterpolate operator-(const InformationToInterpolate& lhs,
+                                   const InformationToInterpolate& rhs);
+InformationToInterpolate operator*(const InformationToInterpolate& lhs, double rhs);
+
+InformationToInterpolate ZeroInformation();
 
 }  // namespace kernel
 }  // namespace project
