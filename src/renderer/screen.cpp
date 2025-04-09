@@ -13,7 +13,7 @@ sf::Image Screen::ConvertToImage() {
     sf::Image image({GetWidth(), GetHeight()});
     for (int x = 0; x < GetWidth(); ++x) {
         for (int y = 0; y < GetHeight(); ++y) {
-            image.setPixel({x, y}, ConvertToSFMLColor(data_.Get(y, x)));
+            image.setPixel({x, GetHeight() - y - 1}, ConvertToSFMLColor(data_.Get(y, x)));
         }
     }
     return image;

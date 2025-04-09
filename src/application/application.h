@@ -4,6 +4,7 @@
 #include <renderer.h>
 #include <SFML/Graphics.hpp>
 #include <functional>
+#include <point.h>
 
 namespace project {
 namespace application {
@@ -29,8 +30,16 @@ private:
 };
 
 namespace detail {
-    const kernel::PosedCamera& RotateProcessor(kernel::World& world);
-}
+struct CameraPlaneSize {
+    geometry::Coordinate h;
+    geometry::Coordinate w;
+};
+
+CameraPlaneSize ExpandSizeAccordingToResolution(CameraPlaneSize size, kernel::Height height,
+                                                kernel::Width width);
+
+const kernel::PosedCamera& RotateProcessor(kernel::World& world);
+}  // namespace detail
 
 }  // namespace application
 }  // namespace project

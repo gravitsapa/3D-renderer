@@ -39,10 +39,14 @@ void Application::LoadSceneWithHouse() {
 
     kernel::PrintDebugInfo(house, "HOUSE");
 
-    world_.AddObject(house, geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.9, 0.5),
+    world_.AddObject(house, geometry::Pose{geometry::Rotation(),
                                            geometry::Position{geometry::Point3d{0, 5, -50}}});
 
-    world_.AddCamera(kernel::Camera{3, 100, 2.5, 2.5, 3.75 / 2, 3.75 / 2});
+    detail::CameraPlaneSize camera_plane_size = ExpandSizeAccordingToResolution(
+        detail::CameraPlaneSize{2.5, 2}, screen_.GetHeight(), screen_.GetWidth());
+
+    world_.AddCamera(kernel::Camera{3, 100, camera_plane_size.w, camera_plane_size.w,
+                                    camera_plane_size.h, camera_plane_size.h});
 
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
@@ -61,10 +65,13 @@ void Application::LoadSceneWithCoffee() {
 
     kernel::PrintDebugInfo(coffee, "COFFEE");
 
-    world_.AddObject(coffee, geometry::Pose{geometry::Rotation::ByAngles(3.14, 0.5, 0),
+    world_.AddObject(coffee, geometry::Pose{geometry::Rotation(),
                                             geometry::Position{geometry::Vector3d{0, 0.4, -0.8}}});
 
-    world_.AddCamera(kernel::Camera{0.5, 2, 0.5, 0.5, 0.375, 0.375});
+    detail::CameraPlaneSize camera_plane_size = ExpandSizeAccordingToResolution(
+        detail::CameraPlaneSize{0.5, 0.5}, screen_.GetHeight(), screen_.GetWidth());
+    world_.AddCamera(kernel::Camera{0.5, 2, camera_plane_size.w, camera_plane_size.w,
+                                    camera_plane_size.h, camera_plane_size.h});
 
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
@@ -87,7 +94,10 @@ void Application::LoadSceneWithChess() {
     world_.AddObject(chess, geometry::Pose{geometry::Rotation::ByAngles(0.2, 0, 0.5),
                                            geometry::Position{geometry::Vector3d{-0.5, -0.5, -2}}});
 
-    world_.AddCamera(kernel::Camera{0.5, 5, 0.5, 0.5, 0.375, 0.375});
+    detail::CameraPlaneSize camera_plane_size = ExpandSizeAccordingToResolution(
+        detail::CameraPlaneSize{0.5, 0.5}, screen_.GetHeight(), screen_.GetWidth());
+    world_.AddCamera(kernel::Camera{0.5, 5, camera_plane_size.w, camera_plane_size.w,
+                                    camera_plane_size.h, camera_plane_size.h});
 
     kernel::Lights lights;
     lights.AddAmbientLight(kernel::AmbientLight(kernel::Color::White() * 0.3));
@@ -129,6 +139,15 @@ void Application::Run() {
 }
 
 namespace detail {
+
+CameraPlaneSize ExpandSizeAccordingToResolution(CameraPlaneSize size, kernel::Height height,
+                                                kernel::Width width) {
+    if (height * size.w > size.h * width) {
+        return CameraPlaneSize{.h = size.w * height / width, .w = size.w};
+    }
+    return CameraPlaneSize{.h = size.h, .w = size.h * width / height};
+}
+
 const kernel::PosedCamera& RotateProcessor(kernel::World& world) {
     static Timer timer = Timer();
     double alpha = timer.TimeInSeconds() / 3;
