@@ -71,23 +71,34 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
     if (!detail::FaceIsVisibleInCamera(global_face, camera)) {
         return;
     }
-    
     Face face_as_viewer_see = detail::MoveFromGlobalToViewerCoordinates(global_face, camera);
+    auto clipped_faces = camera.Clip(face_as_viewer_see);
+    // std::vector<Face> clipped_faces = {face_as_viewer_see};
+
+    for (auto clipped_face : clipped_faces) {
+        RasterizeVertexInViewerSpace(clipped_face, texture, pose, buffer, screen, camera);
+    }
+}
+
+void Renderer::RasterizeVertexInViewerSpace(const Face& face_as_viewer_see, const Texture& texture,
+                                  const geometry::Pose& pose, ZBuffer& buffer, Screen& screen,
+                                  const PosedCamera& camera) {
+    Face global_face = detail::MoveFromLocalToGlobalCoordinates(face_as_viewer_see, camera);
     Face face_in_camera_space = camera.ProjectFaceOnMe(face_as_viewer_see);
 
-    // пока что тупо выкидываем непопадающие треугольники
-    // да, это ужасно. Потом перепишем
-    if (face_in_camera_space.a.point.x() <= -1 || face_in_camera_space.a.point.x() >= 1 ||
-        face_in_camera_space.a.point.y() <= -1 || face_in_camera_space.a.point.y() >= 1 ||
-        face_in_camera_space.a.point.z() <= -1 || face_in_camera_space.a.point.z() >= 1 ||
-        face_in_camera_space.b.point.x() <= -1 || face_in_camera_space.b.point.x() >= 1 ||
-        face_in_camera_space.b.point.y() <= -1 || face_in_camera_space.b.point.y() >= 1 ||
-        face_in_camera_space.b.point.z() <= -1 || face_in_camera_space.b.point.z() >= 1 ||
-        face_in_camera_space.c.point.x() <= -1 || face_in_camera_space.c.point.x() >= 1 ||
-        face_in_camera_space.c.point.y() <= -1 || face_in_camera_space.c.point.y() >= 1 ||
-        face_in_camera_space.c.point.z() <= -1 || face_in_camera_space.c.point.z() >= 1) {
-        return;
-    }
+    // // пока что тупо выкидываем непопадающие треугольники
+    // // да, это ужасно. Потом перепишем
+    // if (face_in_camera_space.a.point.x() <= -1 || face_in_camera_space.a.point.x() >= 1 ||
+    //     face_in_camera_space.a.point.y() <= -1 || face_in_camera_space.a.point.y() >= 1 ||
+    //     face_in_camera_space.a.point.z() <= -1 || face_in_camera_space.a.point.z() >= 1 ||
+    //     face_in_camera_space.b.point.x() <= -1 || face_in_camera_space.b.point.x() >= 1 ||
+    //     face_in_camera_space.b.point.y() <= -1 || face_in_camera_space.b.point.y() >= 1 ||
+    //     face_in_camera_space.b.point.z() <= -1 || face_in_camera_space.b.point.z() >= 1 ||
+    //     face_in_camera_space.c.point.x() <= -1 || face_in_camera_space.c.point.x() >= 1 ||
+    //     face_in_camera_space.c.point.y() <= -1 || face_in_camera_space.c.point.y() >= 1 ||
+    //     face_in_camera_space.c.point.z() <= -1 || face_in_camera_space.c.point.z() >= 1) {
+    //     return;
+    // }
 
     RasterResolution resolution{screen.GetWidth() - 1, screen.GetHeight() - 1};
 
@@ -102,9 +113,9 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
     Color color_by_texture = Color::Random();
 
     for (auto& pixel : rasterized) {
-        
+
         Color color_by_texture = texture.GetPixelColor(pixel.tex_coord_div_z / pixel.z_coord_inv);
-        
+
         assert(std::abs(pixel.z_coord_in_camera_view) <= 1);
         buffer.TryToAddVertex(
             pixel, pixel.z_coord_in_camera_view,
@@ -118,7 +129,8 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
 namespace detail {
 
 bool FaceIsVisibleInCamera(const Face& face, const PosedCamera& camera) {
-    return (camera.pos_vector - face.a.point).dot(geometry::NormalToTriangle(face.a.point, face.b.point, face.c.point)) > 0;
+    return (camera.pos_vector - face.a.point)
+               .dot(geometry::NormalToTriangle(face.a.point, face.b.point, face.c.point)) > 0;
 }
 
 Vertex MoveFromLocalToGlobalCoordinates(const Vertex& local_vertex, const geometry::Pose& pose) {

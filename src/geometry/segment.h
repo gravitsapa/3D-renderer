@@ -5,7 +5,10 @@
 namespace project {
 namespace geometry {
 
-Vector3d NormalToTriangle(const Point3d& a, const Point3d& b, const Point3d& c);
+struct Segment {
+    Point3d a;
+    Point3d b;
+};
 
 }  // namespace geometry
 }  // namespace project

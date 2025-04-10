@@ -12,5 +12,9 @@ struct Vertex {
     TextureCoordinates text_coord;
 };
 
+Vertex operator+(const Vertex& lhs, const Vertex& rhs);
+Vertex operator-(const Vertex& lhs, const Vertex& rhs);
+Vertex operator*(const Vertex& lhs, geometry::Coordinate rhs);
+
 }  // namespace kernel
 }  // namespace project

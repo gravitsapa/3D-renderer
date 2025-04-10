@@ -154,6 +154,7 @@ const kernel::PosedCamera& RotateProcessor(kernel::World& world) {
     double alpha = timer.TimeInSeconds() / 3;
 
     auto new_pose = geometry::Pose(world.GetObject(0));
+    new_pose.pos_vector.y() += alpha / 30;
     new_pose.rot_matrix = geometry::Rotation::ByAngles(0, alpha, 0).rot_matrix;
 
     world.MoveObject(0, new_pose);

@@ -15,6 +15,8 @@ add_executable(3D-renderer
     src/geometry/pose.cpp
     src/geometry/point.cpp
     src/geometry/geom_calc.cpp
+    src/geometry/plane.cpp
+    src/geometry/quantities.cpp
     src/renderer/camera.cpp
     src/renderer/renderer.cpp
     src/renderer/screen.cpp
@@ -27,6 +29,9 @@ add_executable(3D-renderer
     src/renderer/raster_coordinates.cpp
     src/renderer/rasterizer.cpp
     src/renderer/interpolator.cpp
+    src/renderer/clipping.cpp
+    src/renderer/polygon.cpp
+    src/renderer/vertex.cpp
     src/application/arg_parser.cpp
     src/application/application.cpp
     src/application/user_manual.cpp

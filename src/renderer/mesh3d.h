@@ -1,15 +1,10 @@
 #pragma once
 
 #include <vertex.h>
+#include <face.h>
 
 namespace project {
 namespace kernel {
-
-struct Face {
-    Vertex a;
-    Vertex b;
-    Vertex c;
-};
 
 class Mesh3d {
     friend Mesh3d ReadMeshFromFile(const std::string& filename);

@@ -1,8 +1,10 @@
 #include <camera.h>
 #include <cassert>
+#include <clipping.h>
 
 namespace project {
 namespace kernel {
+
 Camera::Camera(geometry::Coordinate near_plane, geometry::Coordinate far_plane,
                geometry::Coordinate left_side, geometry::Coordinate right_side,
                geometry::Coordinate top_side, geometry::Coordinate bottom_side)
@@ -39,6 +41,19 @@ Vertex Camera::ProjectVertexOnMe(const Vertex& vertex) const {
 
 Face Camera::ProjectFaceOnMe(const Face& face) const {
     return Face{ProjectVertexOnMe(face.a), ProjectVertexOnMe(face.b), ProjectVertexOnMe(face.c)};
+}
+
+std::vector<geometry::Plane> Camera::GetPlanes() const {
+    return {geometry::Plane(-near_plane_, 0, -right_side_, 0),
+            geometry::Plane(near_plane_, 0, -left_side_, 0),
+            geometry::Plane(0, -near_plane_, -top_side_, 0),
+            geometry::Plane(0, near_plane_, -bottom_side_, 0),
+            geometry::Plane(0, 0, -1, -near_plane_),
+            geometry::Plane(0, 0, 1, far_plane_)};
+}
+
+std::vector<Face> Camera::Clip(const Face& face) const {
+    return TriangulatePolygon(ClipByPlanes(PolygonByFace(face), GetPlanes()));
 }
 
 }  // namespace kernel

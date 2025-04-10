@@ -172,18 +172,14 @@ Vertex CreateVertexFromIndexes(const ObjFileVertexIndexes& indexes,
         vertex.text_coord = tex_coords[indexes.texture_index - 1];
     }
 
-    if (indexes.normal_index < 0 || indexes.normal_index > normals.size()) {
+    if (indexes.normal_index <= 0 || indexes.normal_index > normals.size()) {
         throw std::runtime_error("Incorrect normal index in obj file");
     }
-    if (indexes.normal_index == 0) {
-        vertex.normal = geometry::Vector3d{0, 0, 1};
-    } else {
-        vertex.normal = normals[indexes.normal_index - 1];
-    }
+    vertex.normal = geometry::Normalized(normals[indexes.normal_index - 1]);
 
     return vertex;
 }
-}  // namespace detail
 
+}  // namespace detail
 }  // namespace kernel
 }  // namespace project

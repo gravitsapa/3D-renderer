@@ -1,6 +1,7 @@
 #pragma once
 
 #include <object.h>
+#include <plane.h>
 
 namespace project {
 namespace kernel {
@@ -13,10 +14,13 @@ public:
 
     Vertex ProjectVertexOnMe(const Vertex& vertex) const;
     Face ProjectFaceOnMe(const Face& face) const;
-
     geometry::Matrix4d GetProjectionMatrix() const;
 
+    std::vector<Face> Clip(const Face& face) const;
+
 private:
+    std::vector<geometry::Plane> GetPlanes() const;
+
     geometry::Coordinate near_plane_;
     geometry::Coordinate far_plane_;
     geometry::Coordinate left_side_;
