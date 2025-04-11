@@ -43,7 +43,7 @@ void Application::LoadSceneWithHouse() {
     kernel::PrintDebugInfo(house, "HOUSE");
 
     world_.AddObject(house, geometry::Pose{geometry::Rotation(),
-                                           geometry::Position{geometry::Point3d{0, 5, -50}}});
+                                           geometry::Position{geometry::Point3d{0, 5, -40}}});
 
     detail::CameraPlaneSize camera_plane_size = ExpandSizeAccordingToResolution(
         detail::CameraPlaneSize{2.5, 2}, screen_.GetHeight(), screen_.GetWidth());
@@ -70,7 +70,7 @@ void Application::LoadSceneWithCoffee() {
 
     world_.AddObject(coffee,
                      geometry::Pose{geometry::Rotation(),
-                                    geometry::Position{geometry::Vector3d{0.2, -0.4, -0.8}}});
+                                    geometry::Position{geometry::Vector3d{0, -0.4, -0.8}}});
 
     detail::CameraPlaneSize camera_plane_size = ExpandSizeAccordingToResolution(
         detail::CameraPlaneSize{0.5, 0.5}, screen_.GetHeight(), screen_.GetWidth());
