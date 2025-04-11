@@ -5,13 +5,15 @@
 #include <SFML/Graphics.hpp>
 #include <ctime>
 #include <timer.h>
+#include <fps_counter.h>
+#include <mouse_tracker.h>
 
 namespace project {
 namespace application {
 Application::Application(kernel::Height screen_height, kernel::Width screen_width,
                          std::string scene_name)
     : screen_(screen_height, screen_width),
-      window_(sf::VideoMode({screen_width, screen_height}), "3D-renderer"), 
+      window_(sf::VideoMode({screen_width, screen_height}), "3D-renderer"),
       renderer_(screen_height, screen_width) {
 
     if (scene_name == "coffee") {
@@ -55,7 +57,7 @@ void Application::LoadSceneWithHouse() {
         kernel::DirectionalLight(geometry::Vector3d(-1, -1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
 
-    frame_processor_ = detail::RotateProcessor;
+    frame_processor_ = detail::InteractiveProcessor();
 }
 
 void Application::LoadSceneWithCoffee() {
@@ -66,8 +68,9 @@ void Application::LoadSceneWithCoffee() {
 
     kernel::PrintDebugInfo(coffee, "COFFEE");
 
-    world_.AddObject(coffee, geometry::Pose{geometry::Rotation(),
-                                            geometry::Position{geometry::Vector3d{0.2, -0.4, -0.8}}});
+    world_.AddObject(coffee,
+                     geometry::Pose{geometry::Rotation(),
+                                    geometry::Position{geometry::Vector3d{0.2, -0.4, -0.8}}});
 
     detail::CameraPlaneSize camera_plane_size = ExpandSizeAccordingToResolution(
         detail::CameraPlaneSize{0.5, 0.5}, screen_.GetHeight(), screen_.GetWidth());
@@ -80,7 +83,7 @@ void Application::LoadSceneWithCoffee() {
         kernel::DirectionalLight(geometry::Vector3d(-1, -1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
 
-    frame_processor_ = detail::RotateProcessor;
+    frame_processor_ = detail::InteractiveProcessor();
 }
 
 void Application::LoadSceneWithChess() {
@@ -106,7 +109,7 @@ void Application::LoadSceneWithChess() {
         kernel::DirectionalLight(geometry::Vector3d(-1, -1, -0.25), kernel::Color::White()));
     world_.AddLights(lights);
 
-    frame_processor_ = detail::RotateProcessor;
+    frame_processor_ = detail::InteractiveProcessor();
 }
 
 void Application::ShowScreen() {
@@ -118,8 +121,8 @@ void Application::ShowScreen() {
 }
 
 void Application::Run() {
-    Timer timer(5 * CLOCKS_PER_SEC);
-    int frames_done = 0;
+    FpsCounter fps_counter(5);
+
     while (window_.isOpen()) {
         while (const std::optional event = window_.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
@@ -131,11 +134,7 @@ void Application::Run() {
         screen_ = renderer_.Project(world_, camera, std::move(screen_));
         ShowScreen();
 
-        frames_done++;
-        if (timer.Tick()) {
-            double mean_fps = static_cast<double>(frames_done) / timer.TimeInSeconds();
-            std::cout << "Mean fps: " << mean_fps << std::endl;
-        }
+        fps_counter.Frame();
     }
 }
 
@@ -149,17 +148,57 @@ CameraPlaneSize ExpandSizeAccordingToResolution(CameraPlaneSize size, kernel::He
     return CameraPlaneSize{.h = size.h, .w = size.h * width / height};
 }
 
-const kernel::PosedCamera& RotateProcessor(kernel::World& world) {
-    static Timer timer = Timer();
-    double alpha = timer.TimeInSeconds() / 3;
+// const kernel::PosedCamera& RotateProcessor(kernel::World& world) {
+//     static Timer timer = Timer();
+//     double alpha = timer.TimeInSeconds() / 3;
 
-    auto new_pose = geometry::Pose(world.GetObject(0));
-    new_pose.pos_vector.y() += alpha / 30;
-    new_pose.rot_matrix = geometry::Rotation::ByAngles(0, alpha, 0).rot_matrix;
+//     auto new_pose = geometry::Pose(world.GetObject(0));
+//     new_pose.pos_vector.y() = alpha / 10 - 1;
+//     new_pose.rot_matrix = geometry::Rotation::ByAngles(0, alpha, 0).rot_matrix;
+
+//     world.MoveObject(0, new_pose);
+//     return world.GetCamera(0);
+// }
+
+geometry::Coordinate InteractiveProcessor::ConvertToGeometryCoordinate(int coord) {
+    return static_cast<geometry::Coordinate>(coord);
+}
+
+geometry::Pose InteractiveProcessor::MovePoseByMouseDisplacement(geometry::Pose pose,
+                                                                 sf::Vector2i displacement) {
+    static constexpr int pixels_per_radian = 300;
+    pose.rot_matrix =
+        geometry::Rotation::ByAngles(-ConvertToGeometryCoordinate(displacement.x) / pixels_per_radian, 0,
+                                     ConvertToGeometryCoordinate(displacement.y) / pixels_per_radian)
+            .rot_matrix *
+        pose.rot_matrix;
+
+    return pose;
+}
+
+const kernel::PosedCamera& InteractiveProcessor::operator()(kernel::World& world) {
+    mouse_tracker_.Frame();
+
+    auto showing_pose_now = geometry::Pose(world.GetObject(0));
+
+    geometry::Pose new_pose;
+    if (mouse_tracker_.IsLeftButtonHolded()) {
+        new_pose = MovePoseByMouseDisplacement(real_object_pose_,
+                                               mouse_tracker_.DisplacementWhileLeftHolded());
+    } else {
+        if (mouse_tracker_.IsLeftButtonJustReleased()) {
+            new_pose = MovePoseByMouseDisplacement(real_object_pose_,
+                                                   mouse_tracker_.DisplacementWhileLeftHolded());
+        } else {
+            new_pose = showing_pose_now;
+        }
+        real_object_pose_ = new_pose;
+    }
 
     world.MoveObject(0, new_pose);
     return world.GetCamera(0);
 }
+
 }  // namespace detail
 
 }  // namespace application
