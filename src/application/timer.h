@@ -14,6 +14,7 @@ public:
     void StartTicking(std::clock_t tick_period);
     bool Tick();
     void StopTicking();
+    void Reset();
 
 private:
     std::clock_t start_clocks_;

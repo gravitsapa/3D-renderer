@@ -33,6 +33,7 @@ add_executable(3D-renderer
     src/renderer/polygon.cpp
     src/renderer/vertex.cpp
     src/application/mouse_tracker.cpp
+    src/application/button_tracker.cpp
     src/application/fps_counter.cpp
     src/application/arg_parser.cpp
     src/application/application.cpp

@@ -49,5 +49,13 @@ void Timer::StopTicking() {
     ticking_ = false;
 }
 
+void Timer::Reset() {
+    start_clocks_ = std::clock();
+    if (ticking_) {
+        start_tick_clocks_ = start_clocks_;
+        ticks_done_ = 0;
+    }
+}
+
 }  // namespace application
 }  // namespace project

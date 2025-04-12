@@ -20,15 +20,15 @@ void MouseTracker::Frame() {
     left_holded_ = left_holded_now;
 }
 
-bool MouseTracker::IsLeftButtonHolded() {
+bool MouseTracker::IsLeftButtonHolded() const {
     return left_holded_;
 }
 
-bool MouseTracker::IsLeftButtonJustReleased() {
+bool MouseTracker::IsLeftButtonJustReleased() const {
     return left_just_released_;
 }
 
-sf::Vector2i MouseTracker::DisplacementWhileLeftHolded() {
+sf::Vector2i MouseTracker::DisplacementWhileLeftHolded() const {
     return displacement_while_left_pressed_;
 }
 

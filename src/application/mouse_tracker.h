@@ -8,9 +8,10 @@ class MouseTracker {
 public:
     void Frame();
 
-    bool IsLeftButtonHolded();
-    bool IsLeftButtonJustReleased();
-    sf::Vector2i DisplacementWhileLeftHolded();
+    bool IsLeftButtonHolded() const;
+    bool IsLeftButtonJustReleased() const;
+    sf::Vector2i DisplacementWhileLeftHolded() const;
+    
 private:
     sf::Vector2i placement_when_left_pressed_;
     sf::Vector2i displacement_while_left_pressed_;
