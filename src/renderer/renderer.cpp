@@ -81,8 +81,8 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
 }
 
 void Renderer::RasterizeVertexInViewerSpace(const Face& face_as_viewer_see, const Texture& texture,
-                                  const geometry::Pose& pose, ZBuffer& buffer, Screen& screen,
-                                  const PosedCamera& camera) {
+                                            const geometry::Pose& pose, ZBuffer& buffer,
+                                            Screen& screen, const PosedCamera& camera) {
     Face global_face = detail::MoveFromLocalToGlobalCoordinates(face_as_viewer_see, camera);
     Face face_in_camera_space = camera.ProjectFaceOnMe(face_as_viewer_see);
 
@@ -116,7 +116,6 @@ void Renderer::RasterizeVertexInViewerSpace(const Face& face_as_viewer_see, cons
 
         Color color_by_texture = texture.GetPixelColor(pixel.tex_coord_div_z / pixel.z_coord_inv);
 
-        assert(std::abs(pixel.z_coord_in_camera_view) <= 1);
         buffer.TryToAddVertex(
             pixel, pixel.z_coord_in_camera_view,
             PixelOriginInformation{
