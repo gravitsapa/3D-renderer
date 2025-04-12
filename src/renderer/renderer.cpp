@@ -73,7 +73,6 @@ void Renderer::RasterizeGlobalVertex(const Face& face, const Texture& texture,
     }
     Face face_as_viewer_see = detail::MoveFromGlobalToViewerCoordinates(global_face, camera);
     auto clipped_faces = camera.Clip(face_as_viewer_see);
-    // std::vector<Face> clipped_faces = {face_as_viewer_see};
 
     for (auto clipped_face : clipped_faces) {
         RasterizeVertexInViewerSpace(clipped_face, texture, pose, buffer, screen, camera);
@@ -85,20 +84,6 @@ void Renderer::RasterizeVertexInViewerSpace(const Face& face_as_viewer_see, cons
                                             Screen& screen, const PosedCamera& camera) {
     Face global_face = detail::MoveFromLocalToGlobalCoordinates(face_as_viewer_see, camera);
     Face face_in_camera_space = camera.ProjectFaceOnMe(face_as_viewer_see);
-
-    // // пока что тупо выкидываем непопадающие треугольники
-    // // да, это ужасно. Потом перепишем
-    // if (face_in_camera_space.a.point.x() <= -1 || face_in_camera_space.a.point.x() >= 1 ||
-    //     face_in_camera_space.a.point.y() <= -1 || face_in_camera_space.a.point.y() >= 1 ||
-    //     face_in_camera_space.a.point.z() <= -1 || face_in_camera_space.a.point.z() >= 1 ||
-    //     face_in_camera_space.b.point.x() <= -1 || face_in_camera_space.b.point.x() >= 1 ||
-    //     face_in_camera_space.b.point.y() <= -1 || face_in_camera_space.b.point.y() >= 1 ||
-    //     face_in_camera_space.b.point.z() <= -1 || face_in_camera_space.b.point.z() >= 1 ||
-    //     face_in_camera_space.c.point.x() <= -1 || face_in_camera_space.c.point.x() >= 1 ||
-    //     face_in_camera_space.c.point.y() <= -1 || face_in_camera_space.c.point.y() >= 1 ||
-    //     face_in_camera_space.c.point.z() <= -1 || face_in_camera_space.c.point.z() >= 1) {
-    //     return;
-    // }
 
     RasterResolution resolution{screen.GetWidth() - 1, screen.GetHeight() - 1};
 
