@@ -18,7 +18,7 @@ void ZBuffer::Assign(Height height, Width width) {
 bool ZBuffer::TryToAddVertex(const RasterPoint2d& raster_point, const geometry::Coordinate& z_coord,
                              const PixelOriginInformation& vertex) {
     auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
-    if (buf_point.depth <= z_coord) {
+    if (geometry::LessOrEqual(buf_point.depth, z_coord)) {
         return false;
     }
 

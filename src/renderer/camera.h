@@ -14,11 +14,11 @@ public:
 
     Vertex ProjectVertexOnMe(const Vertex& vertex) const;
     Face ProjectFaceOnMe(const Face& face) const;
-    geometry::Matrix4d GetProjectionMatrix() const;
 
     std::vector<Face> Clip(const Face& face) const;
 
 private:
+    geometry::Matrix4d GetProjectionMatrix() const;
     std::vector<geometry::Plane> GetPlanes() const;
 
     geometry::Coordinate near_plane_;

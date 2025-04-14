@@ -118,15 +118,19 @@ void Application::ShowScreen() {
     window_.display();
 }
 
+void Application::HandleWindowEvents() {
+    while (const std::optional event = window_.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) {
+            window_.close();
+        }
+    }
+}
+
 void Application::Run() {
     FpsCounter fps_counter(5);
 
     while (window_.isOpen()) {
-        while (const std::optional event = window_.pollEvent()) {
-            if (event->is<sf::Event::Closed>()) {
-                window_.close();
-            }
-        }
+        HandleWindowEvents();
 
         auto camera = frame_processor_(world_);
         screen_ = renderer_.Project(world_, camera, std::move(screen_));

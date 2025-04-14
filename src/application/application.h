@@ -23,6 +23,8 @@ private:
     void LoadSceneWithHouse();
     void LoadSceneWithCoffee();
     void LoadSceneWithChess();
+
+    void HandleWindowEvents();
     void ShowScreen();
 
     sf::RenderWindow window_;
