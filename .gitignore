@@ -1,0 +1,6 @@
+/build
+/release
+
+.DS_Store
+.vscode
+/output

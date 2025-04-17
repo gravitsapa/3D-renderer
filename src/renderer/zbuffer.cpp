@@ -1,0 +1,48 @@
+#include <zbuffer.h>
+#include <limits>
+
+namespace project {
+namespace kernel {
+
+BufferPoint ZBuffer::EmptyPoint() {
+    return BufferPoint{std::numeric_limits<geometry::Coordinate>::infinity(), std::nullopt};
+}
+
+ZBuffer::ZBuffer(Height height, Width width) : buffer_(height, width, EmptyPoint()) {
+}
+
+void ZBuffer::Assign(Height height, Width width) {
+    buffer_.Assign(height, width, EmptyPoint());
+}
+
+bool ZBuffer::TryToAddVertex(const RasterPoint2d& raster_point, const geometry::Coordinate& z_coord,
+                             const PixelOriginInformation& vertex) {
+    auto& buf_point = buffer_.Get(raster_point.y, raster_point.x);
+    if (geometry::LessOrEqual(buf_point.depth, z_coord)) {
+        return false;
+    }
+
+    buf_point = BufferPoint{z_coord, vertex};
+    return true;
+}
+
+Height ZBuffer::GetHeight() {
+    return Height(buffer_.GetHeight());
+}
+
+Width ZBuffer::GetWidth() {
+    return Width(buffer_.GetWidth());
+}
+
+std::optional<PixelOriginInformation>& ZBuffer::GetVertex(Height y, Width x) {
+    assert(0 <= y && y < buffer_.GetHeight() && 0 <= x && x < buffer_.GetWidth());
+    return buffer_.Get(y, x).vertex;
+}
+
+std::optional<PixelOriginInformation> ZBuffer::GetVertex(Height y, Width x) const {
+    assert(0 <= y && y < buffer_.GetHeight() && 0 <= x && x < buffer_.GetWidth());
+    return buffer_.Get(y, x).vertex;
+}
+
+}  // namespace kernel
+}  // namespace project

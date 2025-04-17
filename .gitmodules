@@ -1,0 +1,6 @@
+[submodule "include/eigen"]
+	path = include/eigen
+	url = https://gitlab.com/libeigen/eigen/
+[submodule "include/SFML"]
+	path = include/SFML
+	url = https://github.com/SFML/SFML
